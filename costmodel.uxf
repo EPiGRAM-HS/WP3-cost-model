@@ -5,7 +5,7 @@
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>477</x>
+      <x>468</x>
       <y>702</y>
       <w>567</w>
       <h>216</h>
@@ -30,7 +30,7 @@
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>414</x>
+      <x>405</x>
       <y>45</y>
       <w>1044</w>
       <h>270</h>
@@ -46,20 +46,20 @@
 + getHardware(): Hardware&amp;
 + addDataLayout(name: String, extent: unsigned int, pattern: AccessPattern&amp;): void
 + rmDataLayout(name: String): void
-+ accessCost(device_id: DevID, data_layout: DataLayout&amp;, access_pattern: AccessPattern&amp;): Cost
-+ accessCost(device_id: DevID, data_layout: DataLayout&amp;, access_pattern: AccessPattern&amp;, hardware_info: Hardware&amp;): Cost
++ accessCost(device_id: DevID, data_layout: DataLayout&amp;, access_pattern: AccessPattern&amp;, access_count: unsigned int): Cost
++ accessCost(device_id: DevID, data_layout: DataLayout&amp;, access_pattern: AccessPattern&amp;, access_count: unsigned int, hardware_info: Hardware&amp;): Cost
 + movementCost(device_A: DevID, data_layout_A: DataLayout&amp;, device_B: DevID, data_layout_B: DataLayout&amp;): Cost
 + movementCost(device_A: DevID, data_layout_A: DataLayout&amp;, device_B: DevID, data_layout_B: DataLayout&amp;, hardware_info: Hardware&amp;): Cost
 + movementDecision(device_A: DevID, data_layout_A: DataLayout&amp;, device_B: DevID, data_layout_B: DataLayout&amp;, access_pattern: AccessPattern&amp;): bool
 + movementDecision(device_A: DevID, data_layout_A: DataLayout&amp;, device_B: DevID, data_layout_B: DataLayout&amp;, access_pattern: AccessPattern&amp;, hardware_info: Hardware&amp;): bool
-+ recommendDevice(data_layout: DataLayout, access_pattern: AccessPattern&amp;): DevID
-+ recommendDevice(data_layout: DataLayout, access_pattern: AccessPattern&amp;, hardware_info: Hardware&amp;): DevID</panel_attributes>
++ recommendDevice(data_layout: DataLayout, access_pattern: AccessPattern&amp;, access_count: unsigned int): DevID
++ recommendDevice(data_layout: DataLayout, access_pattern: AccessPattern&amp;, access_count: unsigned int, hardware_info: Hardware&amp;): DevID</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>18</x>
+      <x>9</x>
       <y>702</y>
       <w>414</w>
       <h>225</h>
@@ -85,7 +85,7 @@ _- next_id: DevID_
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>324</x>
+      <x>315</x>
       <y>396</y>
       <w>729</w>
       <h>225</h>
@@ -111,7 +111,7 @@ _- next_id: DevID_
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>558</x>
+      <x>549</x>
       <y>999</y>
       <w>369</w>
       <h>126</h>
@@ -130,18 +130,18 @@ _- next_id: DevID_
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>1233</x>
+      <x>1224</x>
       <y>396</y>
-      <w>720</w>
+      <w>585</w>
       <h>153</h>
     </coordinates>
     <panel_attributes>Access
 --
-- PATTERN: const Vector&lt;Tuple&lt;AccessType, unsigned int&gt;&gt;
-- REPS: const unsigned int
+- PATTERN: const AccessPattern
+- COUNT: const unsigned int
 - DATA_LAYOUT: const DataLayout
 --
-+ &lt;&lt;constructor&gt;&gt; Access(patt: AccessPattern&amp;, type = CM_BYTE: DataLayout, reps = 1: unsigned int, name = "custom": String)
++ &lt;&lt;constructor&gt;&gt; Access(patt: AccessPattern&amp;, type = CM_BYTE: DataLayout, count = 1: unsigned int)
 
 + getReps(): unsigned int
 + begin(): AccessPattern::const_iterator
@@ -151,7 +151,7 @@ _- next_id: DevID_
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>126</x>
+      <x>117</x>
       <y>234</y>
       <w>144</w>
       <h>135</h>
@@ -171,7 +171,7 @@ CART
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>9</x>
+      <x>0</x>
       <y>234</y>
       <w>99</w>
       <h>81</h>
@@ -186,7 +186,7 @@ CONTIGUOUS</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>1233</x>
+      <x>1224</x>
       <y>702</y>
       <w>504</w>
       <h>153</h>
@@ -207,7 +207,7 @@ CONTIGUOUS</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>9</x>
+      <x>0</x>
       <y>45</y>
       <w>261</w>
       <h>54</h>
@@ -220,22 +220,24 @@ Vector&lt;Tuple&lt;AccessType, unsigned int&gt;&gt;</panel_attributes>
   <element>
     <id>UMLNote</id>
     <coordinates>
-      <x>1485</x>
+      <x>1476</x>
       <y>45</y>
-      <w>414</w>
+      <w>288</w>
       <h>135</h>
     </coordinates>
     <panel_attributes>Note
 
-BasicCostModel defines trivial responses to these queries (i.e. return 1;).
+BasicCostModel defines trivial responses to these 
+queries (i.e. return 1;).
 
-It can be inherited from and query functions overridden as we see fit.</panel_attributes>
+It can be inherited from and query functions 
+overridden as we see fit.</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>9</x>
+      <x>0</x>
       <y>171</y>
       <w>261</w>
       <h>36</h>
@@ -247,7 +249,7 @@ Cost: unsigned int</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>9</x>
+      <x>0</x>
       <y>117</y>
       <w>261</w>
       <h>36</h>
@@ -259,7 +261,7 @@ DevID: unsigned int</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>612</x>
+      <x>603</x>
       <y>306</y>
       <w>54</w>
       <h>108</h>
@@ -272,7 +274,7 @@ m2= 0..1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1458</x>
+      <x>1449</x>
       <y>540</y>
       <w>45</w>
       <h>180</h>
@@ -285,7 +287,7 @@ m2= 0..*</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1179</x>
+      <x>1170</x>
       <y>306</y>
       <w>72</w>
       <h>486</h>
@@ -298,7 +300,7 @@ m2=0..1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1422</x>
+      <x>1413</x>
       <y>306</y>
       <w>63</w>
       <h>108</h>
@@ -310,7 +312,7 @@ m2=0..1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>729</x>
+      <x>720</x>
       <y>612</y>
       <w>36</w>
       <h>108</h>
@@ -323,7 +325,7 @@ m2= 1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>351</x>
+      <x>342</x>
       <y>612</y>
       <w>45</w>
       <h>108</h>
@@ -336,7 +338,7 @@ m2= 1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>729</x>
+      <x>720</x>
       <y>909</y>
       <w>45</w>
       <h>108</h>
