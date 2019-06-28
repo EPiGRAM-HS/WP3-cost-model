@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.3.0">
+  <help_text/>
+  <zoom_level>9</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>477</x>
+      <y>702</y>
+      <w>567</w>
+      <h>216</h>
+    </coordinates>
+    <panel_attributes>Topology
+--
+- topology: Graph&lt;Link&gt;
+- network_type: const NetworkType
+--
++ &lt;&lt;constructor&gt;&gt; Topology(num_devices: unsigned int, type = PART_CONN_GRAPH: NetworkType)
++ &lt;&lt;constructor&gt;&gt; Topology(num_devices: unsigned int, old_topo: Topology&amp;)
++ &lt;&lt;constructor&gt;&gt; Topology(Graph&lt;Link&gt;&amp;, type = PART_CONN_GRAPH: NetworkType)
+
++ getNetworkType(): NetworkType
++ setLink(IDA: const DevID, IDB: const DevID, link: Link): void
++ unsetLink(IDA: const DevID, IDB: const DevID): void
++ linkExists(IDA: const DevID, IDB: const DevID): bool
++ routeExists(IDA: const DevID, IDB: const DevID): bool
++ getRoute(IDA: const DevID, IDB: const DevID): Vector&lt;Link&gt;</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>414</x>
+      <y>45</y>
+      <w>1044</w>
+      <h>270</h>
+    </coordinates>
+    <panel_attributes>BasicCostModel
+--
+# hardware: Hardware 
+# known_data_layouts: Map&lt;String, DataLayout&gt;
+--
++ &lt;&lt;constructor&gt;&gt; BasicCostModel()
++ &lt;&lt;constructor&gt;&gt; BasicCostModel(hw_info: Hardware&amp;)
+
++ getHardware(): Hardware&amp;
++ addDataLayout(name: String, extent: unsigned int, pattern: AccessPattern&amp;): void
++ rmDataLayout(name: String): void
++ accessCost(device_id: DevID, data_layout: DataLayout&amp;, access_pattern: AccessPattern&amp;): Cost
++ accessCost(device_id: DevID, data_layout: DataLayout&amp;, access_pattern: AccessPattern&amp;, hardware_info: Hardware&amp;): Cost
++ movementCost(device_A: DevID, data_layout_A: DataLayout&amp;, device_B: DevID, data_layout_B: DataLayout&amp;): Cost
++ movementCost(device_A: DevID, data_layout_A: DataLayout&amp;, device_B: DevID, data_layout_B: DataLayout&amp;, hardware_info: Hardware&amp;): Cost
++ movementDecision(device_A: DevID, data_layout_A: DataLayout&amp;, device_B: DevID, data_layout_B: DataLayout&amp;, access_pattern: AccessPattern&amp;): bool
++ movementDecision(device_A: DevID, data_layout_A: DataLayout&amp;, device_B: DevID, data_layout_B: DataLayout&amp;, access_pattern: AccessPattern&amp;, hardware_info: Hardware&amp;): bool
++ recommendDevice(data_layout: DataLayout, access_pattern: AccessPattern&amp;): DevID
++ recommendDevice(data_layout: DataLayout, access_pattern: AccessPattern&amp;, hardware_info: Hardware&amp;): DevID</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>18</x>
+      <y>702</y>
+      <w>414</w>
+      <h>225</h>
+    </coordinates>
+    <panel_attributes>Device
+--
+_- next_id: DevID_
+- id: DevID
+- NAME: const String
+- RAC: const Cost
+- CAC: const Cost
+- CAPACITY: const double
+--
++ &lt;&lt;constructor&gt;&gt; Device(name: String, rac: Cost, cac: Cost, cap: double)
+
++ getID(): DevID
++ getName(): String 
++ getRandomAccessCost(N: const unsigned int): Cost
++ getContiguousAccessCost(N: const unsigned int): Cost
++ getCapacity(): double</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>324</x>
+      <y>396</y>
+      <w>729</w>
+      <h>225</h>
+    </coordinates>
+    <panel_attributes>Hardware
+--
+- devices: Vector&lt;Device&gt;
+- topo: Topology
+- num_devices: unsigned int
+--
++ &lt;&lt;constructor&gt;&gt; Hardware()
++ &lt;&lt;constructor&gt;&gt; Hardware(device_info: Vector&lt;Tuple&lt;String, Cost, Cost, double&gt;&gt;&amp;, topo_info: unsigned int)
++ &lt;&lt;constructor&gt;&gt; Hardware(device_info: Vector&lt;Tuple&lt;String, Cost, Cost, double&gt;&gt;&amp;, topo_info: Tuple&lt;unsigned int, Topology&gt;&amp;)
++ &lt;&lt;constructor&gt;&gt; Hardware(device_info: Vector&lt;Tuple&lt;String, Cost, Cost, double&gt;&gt;&amp;, topo_info: Graph&amp;)
++ &lt;&lt;constructor&gt;&gt; Hardware(device_info: Vector&lt;Tuple&lt;String, Cost, Cost, double&gt;&gt;&amp;, old_hw: Hardware&amp;)
+
++ getDeviceName(device_id: unsigned int): String
++ getNumDevices(): unsigned int
++ getDevice(id: unsigned int): const Device&amp;
++ getTopology(): const Topology&amp;</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>558</x>
+      <y>999</y>
+      <w>369</w>
+      <h>126</h>
+    </coordinates>
+    <panel_attributes>Link
+--
+- LATENCY: const unsigned int
+- INV_BW: const unsigned int
+--
++ &lt;&lt;constructor&gt;&gt; Link(lat: unsigned int, inverse_bw: unsigned int)
+
++ getLatency(): unsigned int
++ getInverseBW(): unsigned int</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1233</x>
+      <y>396</y>
+      <w>720</w>
+      <h>153</h>
+    </coordinates>
+    <panel_attributes>Access
+--
+- PATTERN: const Vector&lt;Tuple&lt;AccessType, unsigned int&gt;&gt;
+- REPS: const unsigned int
+- DATA_LAYOUT: const DataLayout
+--
++ &lt;&lt;constructor&gt;&gt; Access(patt: AccessPattern&amp;, type = CM_BYTE: DataLayout, reps = 1: unsigned int, name = "custom": String)
+
++ getReps(): unsigned int
++ begin(): AccessPattern::const_iterator
++ end(): AccessPattern::const_iterator</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>126</x>
+      <y>234</y>
+      <w>144</w>
+      <h>135</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;enumeration&gt;&gt;
+NetworkType
+--
+PART_CONN_GRAPH
+FULL_CONN_GRAPH
+STAR
+BUS
+RING
+CART
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>9</x>
+      <y>234</y>
+      <w>99</w>
+      <h>81</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;enumeration&gt;&gt;
+AccessType
+--
+RANDOM
+CONTIGUOUS</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1233</x>
+      <y>702</y>
+      <w>504</w>
+      <h>153</h>
+    </coordinates>
+    <panel_attributes>DataLayout
+--
+- NAME: const String
+- EXTENT: const unsigned int
+- PATTERN: const AccessPattern
+--
++ &lt;&lt;constructor&gt;&gt; DataLayout(name: String, extent: unsigned int, layout: AccessPattern&amp;) 
+
++ getName(): const String
++ getExtent(): const unsigned int
++ getPattern(): const AccessPattern&amp; </panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>9</x>
+      <y>45</y>
+      <w>261</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;typedef&gt;&gt;
+AccessPattern: 
+Vector&lt;Tuple&lt;AccessType, unsigned int&gt;&gt;</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>1485</x>
+      <y>45</y>
+      <w>414</w>
+      <h>135</h>
+    </coordinates>
+    <panel_attributes>Note
+
+BasicCostModel defines trivial responses to these queries (i.e. return 1;).
+
+It can be inherited from and query functions overridden as we see fit.</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>9</x>
+      <y>171</y>
+      <w>261</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;typedef&gt;&gt;
+Cost: unsigned int</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>9</x>
+      <y>117</y>
+      <w>261</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;typedef&gt;&gt;
+DevID: unsigned int</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>612</x>
+      <y>306</y>
+      <w>54</w>
+      <h>108</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m1= 0..1
+m2= 0..1</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;100.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1458</x>
+      <y>540</y>
+      <w>45</w>
+      <h>180</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m1= 1
+m2= 0..*</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;180.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1179</x>
+      <y>306</y>
+      <w>72</w>
+      <h>486</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m1=0..*
+m2=0..1</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;510.0;60.0;510.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1422</x>
+      <y>306</y>
+      <w>63</w>
+      <h>108</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.
+&lt;&lt;uses&gt;&gt;</panel_attributes>
+    <additional_attributes>10.0;100.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>729</x>
+      <y>612</y>
+      <w>36</w>
+      <h>108</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1= 1
+m2= 1</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;100.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>351</x>
+      <y>612</y>
+      <w>45</w>
+      <h>108</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1= 1..*
+m2= 1</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;100.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>729</x>
+      <y>909</y>
+      <w>45</w>
+      <h>108</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1= 1..*
+m2= 1</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;100.0</additional_attributes>
+  </element>
+</diagram>
