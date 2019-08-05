@@ -62,24 +62,27 @@
       <x>9</x>
       <y>702</y>
       <w>414</w>
-      <h>225</h>
+      <h>270</h>
     </coordinates>
     <panel_attributes>Device
 --
 _- next_id: DevID_
 - id: DevID
 - NAME: const String
-- RAC: const Cost
-- CAC: const Cost
+- BAC: const Cost
+- EAC: const Cost
 - CAPACITY: const double
+- VECTOR_LENGTH: const unsigned int
 --
-+ &lt;&lt;constructor&gt;&gt; Device(name: String, rac: Cost, cac: Cost, cap: double)
++ &lt;&lt;constructor&gt;&gt; Device(name: String, rac: Cost, cac: Cost, cap: double, 
+veclen: unsigned int)
 
 + getID(): DevID
 + getName(): String 
-+ getRandomAccessCost(N: const unsigned int): Cost
-+ getContiguousAccessCost(N: const unsigned int): Cost
-+ getCapacity(): double</panel_attributes>
++ getBasicAccessCost(N: const unsigned int): Cost
++ getExpensiveAccessCost(N: const unsigned int): Cost
++ getCapacity(): double
++ getVectorLength(): unsigned int</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -179,8 +182,9 @@ CART
     <panel_attributes>&lt;&lt;enumeration&gt;&gt;
 AccessType
 --
-RANDOM
-CONTIGUOUS</panel_attributes>
+FREE
+BASIC
+EXPENSIVE</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
