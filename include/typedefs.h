@@ -15,13 +15,13 @@ namespace CostModel {
     PART_CONN_GRAPH,
     FULL_CONN_GRAPH,
     STAR,
-    BUS,
     RING,
     CART
   };
 
   typedef unsigned int Cost;
   typedef unsigned int DevID;
+  typedef unsigned int LinkID;
   typedef std::vector<std::tuple<AccessType, unsigned int>> AccessPattern;
 }
 
