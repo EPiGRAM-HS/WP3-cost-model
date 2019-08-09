@@ -16,9 +16,9 @@ namespace CostModel {
       DataLayout(std::string name, unsigned int extent, AccessPattern& ap)
         : NAME(name), EXTENT(extent), PATTERN(ap) {};
 
-      std::string getName() { return NAME; }
-      unsigned int getExtent() { return EXTENT; }
-      AccessPattern getPattern() { return PATTERN; }
+      std::string getName() const { return NAME; }
+      unsigned int getExtent() const { return EXTENT; }
+      const AccessPattern& getPattern() const { return PATTERN; }
   };
 }
 
