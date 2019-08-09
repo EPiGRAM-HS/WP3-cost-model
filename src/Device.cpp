@@ -1,5 +1,6 @@
 #include "Device.h"
 
 namespace CostModel {
-  DevID Device::next_id = 0;
+  // DevID = 0 reserved for NULL device
+  DevID Device::next_id = 1;
 }

@@ -17,6 +17,8 @@ namespace CostModel {
 
     public:
       Device() = delete;
+      Device(void *) : ID(0), NAME(std::string("NULL")), BAC(0), EAC(0),
+        CAPACITY(0.0), VECTOR_LENGTH(0) {};
       Device(std::string name, Cost bac, Cost eac, double cap,
         unsigned int veclen)
         : ID(next_id++), NAME(name), BAC(bac), EAC(eac), CAPACITY(cap),
@@ -27,6 +29,7 @@ namespace CostModel {
       : ID(next_id++), NAME(source.NAME), BAC(source.BAC), EAC(source.EAC),
       CAPACITY(source.CAPACITY), VECTOR_LENGTH(source.VECTOR_LENGTH) {};
 
+      bool isNull() { return ID == 0; }
       DevID getID() { return ID; }
       std::string getName() { return NAME; }
       Cost getBasicAccessCost(const unsigned int N) { return N * BAC; }
