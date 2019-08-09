@@ -32,8 +32,9 @@ namespace CostModel {
       void unsetLink(const DevID, const DevID);
       bool linkExists(const DevID, const DevID);
       bool routeExists(const DevID, const DevID);
-      std::vector<std::tuple<DevID,DevID,Link>>
-        getRoute(const DevID, const DevID);
+      std::vector<DevID> getMostDirectRoute(const DevID, const DevID);
+      std::vector<DevID> getLowestLatencyRoute(const DevID, const DevID);
+      std::vector<DevID> getHighestBWRoute(const DevID, const DevID);
   };
 }
 

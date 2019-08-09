@@ -1,6 +1,9 @@
 #include <vector>
 #include <tuple>
+#include <algorithm>
 #include "Topology.h"
+#include "lemon/bfs.h"
+#include "lemon/dijkstra.h"
 
 namespace CostModel {
   void Topology::reserveEdge(unsigned int num_devices, NetworkType type) {
@@ -66,6 +69,68 @@ namespace CostModel {
     topo_edges.emplace(link.getLinkID(), edge);
 
     return;
+  }
+
+  void Topology::unsetLink(const DevID IDA, const DevID IDB) {
+    const LinkID LINK_ID = unorderedCantor(IDA, IDB);
+    const lemon::ListGraph::Edge EDGE = topo_edges.at(LINK_ID);
+
+    topo_graph.erase(EDGE);
+    topo_edges.erase(LINK_ID);
+
+    return;
+  }
+
+  bool Topology::linkExists(const DevID IDA, const DevID IDB) {
+    const LinkID LINK_ID = unorderedCantor(IDA, IDB);
+
+    std::unordered_map<LinkID,lemon::ListGraph::Edge>::const_iterator it_edge
+      = topo_edges.find(LINK_ID);
+
+    if(it_edge == topo_edges.end()) return false;
+
+    return true;
+  }
+
+  bool Topology::routeExists(const DevID IDA, const DevID IDB) {
+    if (NETWORK_TYPE != NetworkType::PART_CONN_GRAPH) return true;
+
+    const lemon::ListGraph::Node NODE_A = topo_nodes.at(IDA);
+    const lemon::ListGraph::Node NODE_B = topo_nodes.at(IDB);
+
+    bool reached = bfs(topo_graph).run(NODE_A, NODE_B);
+
+    return reached;
+  }
+
+  std::vector<DevID> Topology::getMostDirectRoute(const DevID IDA,
+    const DevID IDB) {
+    std::vector<DevID> route;
+
+    if (IDA == IDB) {
+      route.push_back(IDA);
+      return route;
+    }
+
+    lemon::ListGraph::Node NODE_A = topo_nodes.at(IDA);
+    lemon::ListGraph::Node NODE_B = topo_nodes.at(IDB);
+    lemon::ListGraph::EdgeMap<int> unit_length(topo_graph, 1);
+    lemon::Dijkstra<lemon::ListGraph, lemon::ListGraph::EdgeMap<int>>
+      solver(topo_graph, unit_length);
+
+    bool reached = solver.run(NODE_A, NODE_B);
+    if (!reached) return route;
+    int length = solver.dist(NODE_B);
+    route.reserve(length);
+
+    for (lemon::ListGraph::Node node = NODE_B; node != lemon::INVALID;
+      node = solver.predNode(node)) {
+      DevID dev_id = topo_devs[node];
+      route.push_back(dev_id);
+    }
+    std::reverse(route.begin(), route.end());
+
+    return route;
   }
 
 }
