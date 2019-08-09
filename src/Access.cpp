@@ -21,10 +21,7 @@ namespace CostModel {
           // cost of initial access should be promoted to EXPENSIVE
           out_pattern.push_back(std::make_pair(AccessType::EXPENSIVE, 1));
 
-          AccessType init_type;
-          unsigned int init_count;
-          std::tie(init_type, init_count) = lpattern.front();
-
+          auto [init_type, init_count] = lpattern.front();
           if (init_count > 1)
           out_pattern.push_back(std::make_pair(init_type, init_count - 1));
 
