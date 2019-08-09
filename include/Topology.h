@@ -24,15 +24,20 @@ namespace CostModel {
 
     public:
       Topology(unsigned int, NetworkType);
-      Topology(unsigned int, std::vector<DevID>, NetworkType);
-      Topology(Topology&) = delete;
+      Topology(unsigned int, std::vector<DevID>&, NetworkType);
+      Topology(const unsigned int, const Topology&);
+      Topology(const unsigned int, const Topology&, const NetworkType);
 
-      NetworkType getNetworkType() { return NETWORK_TYPE; }
+      NetworkType getNetworkType() const { return NETWORK_TYPE; }
+      void addDevice(const DevID);
+      void addDevice(const std::vector<DevID>&);
+      void removeDevice(const DevID);
+      void removeDevice(const std::vector<DevID>&);
       void setLink(const DevID, const DevID, Link&);
       void unsetLink(const DevID, const DevID);
-      bool linkExists(const DevID, const DevID);
-      bool routeExists(const DevID, const DevID);
-      std::vector<DevID> getMostDirectRoute(const DevID, const DevID);
+      bool linkExists(const DevID, const DevID) const;
+      bool routeExists(const DevID, const DevID) const;
+      std::vector<DevID> getMostDirectRoute(const DevID, const DevID) const;
       std::vector<DevID> getLowestLatencyRoute(const DevID, const DevID);
       std::vector<DevID> getHighestBWRoute(const DevID, const DevID);
   };

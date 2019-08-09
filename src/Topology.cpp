@@ -12,12 +12,15 @@ namespace CostModel {
         break;
       case NetworkType::FULL_CONN_GRAPH:
         topo_graph.reserveEdge((num_devices * (num_devices-1)) / 2);
+        topo_edges.reserve((num_devices * (num_devices-1)) / 2);
         break;
       case NetworkType::STAR:
         topo_graph.reserveEdge(num_devices - 1);
+        topo_edges.reserve(num_devices - 1);
         break;
       case NetworkType::RING:
         topo_graph.reserveEdge(num_devices);
+        topo_edges.reserve(num_devices);
         break;
       case NetworkType::CART: // nothing we can do!
         break;
@@ -37,10 +40,11 @@ namespace CostModel {
     return;
   }
 
-  Topology::Topology(unsigned int num_devices, std::vector<DevID> dev_vec,
+  Topology::Topology(unsigned int num_devices, std::vector<DevID>& dev_vec,
     NetworkType type = NetworkType::PART_CONN_GRAPH)
     : NETWORK_TYPE(type), topo_devs(topo_graph), topo_links(topo_graph) {
     topo_graph.reserveNode(num_devices);
+    topo_nodes.reserve(num_devices);
     reserveEdge(num_devices, type);
 
     lemon::ListGraph::Node node;
@@ -50,6 +54,91 @@ namespace CostModel {
       topo_nodes.emplace(dev_id, node);
     }
 
+    return;
+  }
+
+  Topology::Topology(const unsigned int num_devices, const Topology& src)
+    : NETWORK_TYPE(src.NETWORK_TYPE), topo_devs(topo_graph),
+    topo_nodes(src.topo_nodes), topo_links(topo_graph),
+    topo_edges(src.topo_edges) {
+
+    lemon::GraphCopy<lemon::ListGraph, lemon::ListGraph>
+      copy_graph(src.topo_graph, topo_graph);
+    copy_graph.nodeMap(src.topo_devs, topo_devs);
+    copy_graph.edgeMap(src.topo_links, topo_links);
+    copy_graph.run();
+
+    if (num_devices > topo_nodes.size()) {
+      topo_graph.reserveNode(num_devices);
+      topo_nodes.reserve(num_devices);
+      reserveEdge(num_devices, NETWORK_TYPE);
+    }
+
+    return;
+  }
+
+  Topology::Topology(const unsigned int num_devices, const Topology& src,
+    const NetworkType net_type) : NETWORK_TYPE(net_type), topo_devs(topo_graph),
+    topo_nodes(src.topo_nodes), topo_links(topo_graph),
+    topo_edges(src.topo_edges) {
+
+    lemon::GraphCopy<lemon::ListGraph, lemon::ListGraph>
+      copy_graph(src.topo_graph, topo_graph);
+    copy_graph.nodeMap(src.topo_devs, topo_devs);
+    copy_graph.edgeMap(src.topo_links, topo_links);
+    copy_graph.run();
+
+    if (num_devices > topo_nodes.size()) {
+      topo_graph.reserveNode(num_devices);
+      topo_nodes.reserve(num_devices);
+      reserveEdge(num_devices, NETWORK_TYPE);
+    }
+
+    return;
+  }
+
+  void Topology::addDevice(const DevID DEV_ID) {
+    lemon::ListGraph::Node node = topo_graph.addNode();
+    topo_devs[node] = DEV_ID;
+    topo_nodes.emplace(DEV_ID, node);
+    return;
+  }
+
+  void Topology::addDevice(const std::vector<DevID>& DEV_VEC) {
+    for (DevID dev_id : DEV_VEC) {
+      lemon::ListGraph::Node node = topo_graph.addNode();
+      topo_devs[node] = dev_id;
+      topo_nodes.emplace(dev_id, node);
+    }
+    return;
+  }
+
+  void Topology::removeDevice(const DevID DEV_ID) {
+    // bit more complicated, we need to also remove any connected edges
+    lemon::ListGraph::Node node = topo_nodes.at(DEV_ID);
+
+    for (lemon::ListGraph::IncEdgeIt edge_it(topo_graph, node);
+      edge_it != lemon::INVALID; ++edge_it) {
+      // get edge and corresponding LinkID
+      lemon::ListGraph::Edge edge(edge_it);
+      LinkID link_id = topo_links[edge].getLinkID();
+      // remove both!
+      topo_graph.erase(edge);
+      topo_edges.erase(link_id);
+    }
+
+    // should now be safe to remove node
+    topo_graph.erase(node);
+    topo_nodes.erase(DEV_ID);
+
+    return;
+  }
+
+  void Topology::removeDevice(const std::vector<DevID>& DEV_VEC) {
+    // take the coward's way out
+    for (DevID dev_id : DEV_VEC) {
+      removeDevice(dev_id);
+    }
     return;
   }
 
@@ -81,7 +170,7 @@ namespace CostModel {
     return;
   }
 
-  bool Topology::linkExists(const DevID IDA, const DevID IDB) {
+  bool Topology::linkExists(const DevID IDA, const DevID IDB) const {
     const LinkID LINK_ID = unorderedCantor(IDA, IDB);
 
     std::unordered_map<LinkID,lemon::ListGraph::Edge>::const_iterator it_edge
@@ -92,7 +181,7 @@ namespace CostModel {
     return true;
   }
 
-  bool Topology::routeExists(const DevID IDA, const DevID IDB) {
+  bool Topology::routeExists(const DevID IDA, const DevID IDB) const {
     if (NETWORK_TYPE != NetworkType::PART_CONN_GRAPH) return true;
 
     const lemon::ListGraph::Node NODE_A = topo_nodes.at(IDA);
@@ -104,7 +193,7 @@ namespace CostModel {
   }
 
   std::vector<DevID> Topology::getMostDirectRoute(const DevID IDA,
-    const DevID IDB) {
+    const DevID IDB) const {
     std::vector<DevID> route;
 
     if (IDA == IDB) {
