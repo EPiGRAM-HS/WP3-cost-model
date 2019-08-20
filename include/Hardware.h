@@ -16,7 +16,7 @@ namespace CostModel {
       Topology topo;
 
     public:
-      Hardware() = default;
+      Hardware() = delete;
       Hardware(const std::vector<std::tuple<std::string, Cost, Cost, double,
         unsigned int>>&);
       Hardware(const std::vector<std::tuple<std::string, Cost, Cost, double,
