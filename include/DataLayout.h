@@ -13,7 +13,7 @@ namespace CostModel {
 
     public:
       // assumes copy cost of ap is reasonable
-      DataLayout(std::string name, unsigned int extent, AccessPattern ap)
+      DataLayout(std::string name, unsigned int extent, AccessPattern& ap)
         : NAME(name), EXTENT(extent), PATTERN(ap) {};
 
       std::string getName() const { return NAME; }
