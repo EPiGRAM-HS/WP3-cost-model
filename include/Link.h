@@ -12,7 +12,7 @@ namespace CostModel {
       double inverse_bw;
 
     public:
-      Link() = delete;
+      Link() : latency(0), inverse_bw(0) {};
       Link(unsigned int lat, double inv_bw)
       : latency(lat), inverse_bw(inv_bw) {};
 
