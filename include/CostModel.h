@@ -15,20 +15,26 @@ namespace CostModel {
 
       void defaultLayouts() {
         std::string str_cmbyte("CM_BYTE");
-        known_data_layouts.emplace(str_cmbyte, DataLayout(str_cmbyte, 1,
-          AccessPattern(1, std::make_pair(AccessType::BASIC, 1))));
-
+        AccessPattern ap(1, std::make_pair(AccessType::BASIC, 1));
+        known_data_layouts.emplace(str_cmbyte, DataLayout(str_cmbyte, 1, ap));
         return;
       }
 
     public:
-      BasicCostModel() = default;
+      BasicCostModel() = delete;
       BasicCostModel(const std::vector<std::tuple<std::string, Cost, Cost, double,
         unsigned int>>& hw_info) : hardware(hw_info) { defaultLayouts(); }
 
-
       Hardware& getHardware() { return hardware; }
-
+      void addDataLayout(std::string name, unsigned int extent,
+        AccessPattern& ap) {
+        known_data_layouts.emplace(name, DataLayout(name, extent, ap));
+        return;
+      }
+      void rmDataLayout(std::string name) {
+        known_data_layouts.erase(name);
+        return;
+      }
   };
 }
 
