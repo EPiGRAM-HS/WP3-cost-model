@@ -29,13 +29,13 @@ namespace CostModel {
       : ID(next_id++), NAME(source.NAME), BAC(source.BAC), EAC(source.EAC),
       CAPACITY(source.CAPACITY), VECTOR_LENGTH(source.VECTOR_LENGTH) {};
 
-      bool isNull() { return ID == 0; }
-      DevID getID() { return ID; }
-      std::string getName() { return NAME; }
-      Cost getBasicAccessCost(const unsigned int N) { return N * BAC; }
-      Cost getExpensiveAccessCost(const unsigned int N) { return N * EAC; }
-      double getCapacity() { return CAPACITY; }
-      unsigned int getVectorLength() { return VECTOR_LENGTH; }
+      bool isNull() const { return ID == 0; }
+      DevID getID() const { return ID; }
+      std::string getName() const { return NAME; }
+      Cost getBasicAccessCost(const unsigned int N) const { return N * BAC; }
+      Cost getExpensiveAccessCost(const unsigned int N) const {return N * EAC;}
+      double getCapacity() const { return CAPACITY; }
+      unsigned int getVectorLength() const { return VECTOR_LENGTH; }
   };
 }
 
