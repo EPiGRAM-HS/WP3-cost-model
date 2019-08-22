@@ -22,8 +22,9 @@ namespace CostModel {
 
     public:
       BasicCostModel() = delete;
-      BasicCostModel(const std::vector<std::tuple<std::string, Cost, Cost, double,
-        unsigned int>>& hw_info) : hardware(hw_info) { defaultLayouts(); }
+      BasicCostModel(const std::vector<std::tuple<std::string, Cost, Cost,
+        double, unsigned int>>& hw_info)
+        : hardware(hw_info) { defaultLayouts(); }
 
       Hardware& getHardware() { return hardware; }
       void addDataLayout(std::string name, unsigned int extent,
@@ -35,6 +36,38 @@ namespace CostModel {
         known_data_layouts.erase(name);
         return;
       }
+
+      // cost to access data in a particular pattern on a particular device
+      Cost accessCost(const DevID DEV_ID, const DataLayout& LAYOUT,
+        const AccessPattern& AP, const unsigned int COUNT)
+        { return accessCost(DEV_ID, LAYOUT, AP, COUNT, hardware); }
+      Cost accessCost(const DevID, const DataLayout&, const AccessPattern&,
+        const unsigned int, const Hardware&);
+
+      // cost to move data from device A to device B
+      Cost movementCost(const DevID DEV_SRC, const DataLayout& LAYOUT_SRC,
+        const DevID DEV_DEST, const DataLayout& LAYOUT_DEST)
+        { return movementCost(DEV_SRC, LAYOUT_SRC, DEV_DEST, LAYOUT_DEST,
+          hardware); }
+      Cost movementCost(const DevID, const DataLayout&, const DevID,
+        const DataLayout&, Hardware&);
+
+      // should data be moved from device A to device B?
+      bool movementDecision(const DevID DEV_SRC, const DataLayout& LAYOUT_SRC,
+        const DevID DEV_DEST, const DataLayout& LAYOUT_DEST,
+        const AccessPattern& AP, const unsigned int COUNT)
+        { return movementDecision(DEV_SRC, LAYOUT_SRC, DEV_DEST, LAYOUT_DEST,
+          AP, COUNT, hardware); }
+      bool movementDecision(const DevID, const DataLayout&, const DevID,
+        const DataLayout&, const AccessPattern&, const unsigned int,
+        Hardware&);
+
+      // which device would be best for this data?
+      DevID recommendDevice(const DataLayout& LAYOUT, const AccessPattern& AP,
+        const unsigned int COUNT)
+        { return recommendDevice(LAYOUT, AP, COUNT, hardware); }
+      DevID recommendDevice(const DataLayout&, const AccessPattern&,
+        const unsigned int, const Hardware&);
   };
 }
 
