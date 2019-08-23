@@ -20,7 +20,7 @@ namespace CostModel {
         // treating inverse bandwidth (s/B) as summative here...
         link_id = 0;
         latency += RHS.latency;
-        inverse_bw += RHS.latency;
+        inverse_bw += RHS.inverse_bw;
         return *this;
       }
       friend Link operator+(Link lhs, const Link& RHS) { return lhs += RHS; }
