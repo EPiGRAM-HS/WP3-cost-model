@@ -1,6 +1,6 @@
 add_executable(
-  c2InitTests c2InitTests.cpp
+  c2InitTests c2UnitTests.cpp
 )
 
-target_link_libraries(c2InitTests Catch2::Catch2 costmodel)
-ParseAndAddCatchTests(c2InitTests)
+target_link_libraries(c2UnitTests Catch2::Catch2 costmodel)
+ParseAndAddCatchTests(c2UnitTests)
