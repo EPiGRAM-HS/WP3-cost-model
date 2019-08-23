@@ -66,7 +66,7 @@ TEST_CASE("Link", "[unit]")
 
   SECTION("One Link") {
     const unsigned int LAT = 2;
-    const double INV_BW = 40E-6;
+    const unsigned int INV_BW = 4E4;
     const DevID DEV_A = 5;
     const DevID DEV_B = 12;
     const LinkID LID = CostModel::unorderedCantor(DEV_A, DEV_B);
@@ -82,8 +82,8 @@ TEST_CASE("Link", "[unit]")
   SECTION("Multiple Links") {
     const unsigned int LAT1 = 2;
     const unsigned int LAT2 = 3;
-    const double INV_BW1 = 40E-6;
-    const double INV_BW2 = 57E-6;
+    const unsigned int INV_BW1 = 4E4;
+    const unsigned int INV_BW2 = 57E3;
     const DevID DEV_A = 5;
     const DevID DEV_B = 12;
     const DevID DEV_C = 2;
@@ -107,5 +107,17 @@ TEST_CASE("Link", "[unit]")
     REQUIRE(link3.getLinkID() == link1.getLinkID());
 
     link3 = link1 + link2;
+    REQUIRE(link3.getLatency() == LAT1 + LAT2);
+    REQUIRE(link3.getInverseBW() == INV_BW1 + INV_BW2);
+    REQUIRE(link3.getLinkID() == 0);
+
+    link3.setLinkID(DEV_C, DEV_A);
+    REQUIRE_FALSE((link3.getLinkID() == link1.getLinkID()
+      || link3.getLinkID() == link2.getLinkID()));
+
+    link1 += link3;
+    REQUIRE(link1.getLinkID() == 0);
+    REQUIRE(link1.getLatency() == LAT1 + LAT1 + LAT2);
+    REQUIRE(link1.getInverseBW() == INV_BW1 + INV_BW1 + INV_BW2);
   }
 }
