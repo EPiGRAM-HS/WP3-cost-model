@@ -8,8 +8,8 @@ namespace CostModel {
   class Link {
     private:
       LinkID link_id;
-      unsigned int latency;
-      double inverse_bw;
+      unsigned int latency;     // in nanoseconds
+      unsigned int inverse_bw;  // in nanoseconds per bit
 
     public:
       Link() : latency(0), inverse_bw(0) {};
@@ -17,7 +17,7 @@ namespace CostModel {
       : latency(lat), inverse_bw(inv_bw) {};
 
       Link& operator+=(const Link& RHS) {
-        // treating inverse bandwidth (s/B) as summative here...
+        // treating inverse bandwidth (ns/b) as summative here...
         link_id = 0;
         latency += RHS.latency;
         inverse_bw += RHS.inverse_bw;
