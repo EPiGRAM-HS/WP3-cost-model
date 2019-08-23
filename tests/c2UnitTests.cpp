@@ -3,6 +3,7 @@
 #include "Device.h"
 #include "Link.h"
 #include "utils.h"
+#include "DataLayout.h"
 
 using namespace CostModel;
 
@@ -119,5 +120,24 @@ TEST_CASE("Link", "[unit]")
     REQUIRE(link1.getLinkID() == 0);
     REQUIRE(link1.getLatency() == LAT1 + LAT1 + LAT2);
     REQUIRE(link1.getInverseBW() == INV_BW1 + INV_BW1 + INV_BW2);
+  }
+}
+
+TEST_CASE("DataLayout", "[unit]")
+{
+  const std::string NAME("complex double");
+  const unsigned int EXTENT = 16;
+  AccessPattern AP_COMPDBL(1, std::make_pair(AccessType::BASIC, 16));
+
+  const DataLayout COMPLEX_DOUBLE(NAME, EXTENT, AP_COMPDBL);
+
+  REQUIRE_THAT(COMPLEX_DOUBLE.getName(), Catch::Equals(NAME));
+  REQUIRE(COMPLEX_DOUBLE.getExtent() == EXTENT);
+  REQUIRE(COMPLEX_DOUBLE.getPattern().size() == 1);
+  // check we can get iterator if necessary
+  for (auto iter = COMPLEX_DOUBLE.getPattern().begin();
+  iter != COMPLEX_DOUBLE.getPattern().end(); ++iter) {
+    REQUIRE(std::get<0>(*iter) == AccessType::BASIC);
+    REQUIRE(std::get<1>(*iter) == 16);
   }
 }
