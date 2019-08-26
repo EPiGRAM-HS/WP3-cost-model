@@ -25,13 +25,13 @@ namespace CostModel {
       }
       friend Link operator+(Link lhs, const Link& RHS) { return lhs += RHS; }
 
-      void setLinkID(DevID A, DevID B) {
+      void setLinkID(const DevID A, const DevID B) {
         link_id = unorderedCantor(A, B);
         return;
       }
       LinkID getLinkID() const { return link_id; }
       unsigned int getLatency() const { return latency; }
-      double getInverseBW() const { return inverse_bw; }
+      unsigned int getInverseBW() const { return inverse_bw; }
   };
 }
 

@@ -22,9 +22,9 @@ namespace CostModel {
       Hardware(const std::vector<std::tuple<std::string, Cost, Cost, double,
         unsigned int>>&, NetworkType);
       Hardware(const std::vector<std::tuple<std::string, Cost, Cost, double,
-        unsigned int>>&, Hardware& old_hw);
+        unsigned int>>&, Hardware&);
       Hardware(const std::vector<std::tuple<std::string, Cost, Cost, double,
-        unsigned int>>&, Hardware& old_hw, NetworkType);
+        unsigned int>>&, Hardware&, NetworkType);
 
       std::string getDeviceName(const DevID) const;
       unsigned int getNumDevices() const { return num_devices; }
