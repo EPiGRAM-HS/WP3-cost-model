@@ -1,4 +1,6 @@
-add_library(costmodel STATIC Access.cpp Device.cpp Hardware.cpp Topology.cpp)
+add_library(costmodel
+  STATIC
+  Access.cpp Device.cpp Hardware.cpp Topology.cpp utils.cpp)
 
 target_compile_features(costmodel PUBLIC cxx_std_17)
 
