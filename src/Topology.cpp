@@ -67,7 +67,7 @@ namespace CostModel {
     copy_graph.edgeMap(src.topo_links, topo_links);
     copy_graph.run();
 
-    if (num_devices > topo_nodes.size()) {
+    if (num_devices > topo_nodes.max_size()) {
       topo_graph.reserveNode(num_devices);
       topo_nodes.reserve(num_devices);
       reserveEdge(num_devices, NETWORK_TYPE);
@@ -87,7 +87,7 @@ namespace CostModel {
     copy_graph.edgeMap(src.topo_links, topo_links);
     copy_graph.run();
 
-    if (num_devices > topo_nodes.size()) {
+    if (num_devices > topo_nodes.max_size()) {
       topo_graph.reserveNode(num_devices);
       topo_nodes.reserve(num_devices);
       reserveEdge(num_devices, NETWORK_TYPE);
@@ -97,39 +97,40 @@ namespace CostModel {
   }
 
   void Topology::addDevice(const DevID DEV_ID) {
-    lemon::ListGraph::Node node = topo_graph.addNode();
-    topo_devs[node] = DEV_ID;
-    topo_nodes.emplace(DEV_ID, node);
+    if (topo_nodes.find(DEV_ID) == topo_nodes.end()) {
+      lemon::ListGraph::Node node = topo_graph.addNode();
+      topo_devs[node] = DEV_ID;
+      topo_nodes.emplace(DEV_ID, node);
+    }
     return;
   }
 
   void Topology::addDevice(const std::vector<DevID>& DEV_VEC) {
     for (DevID dev_id : DEV_VEC) {
-      lemon::ListGraph::Node node = topo_graph.addNode();
-      topo_devs[node] = dev_id;
-      topo_nodes.emplace(dev_id, node);
+      addDevice(dev_id);
     }
     return;
   }
 
   void Topology::removeDevice(const DevID DEV_ID) {
-    // bit more complicated, we need to also remove any connected edges
-    lemon::ListGraph::Node node = topo_nodes.at(DEV_ID);
+    if (topo_nodes.find(DEV_ID) != topo_nodes.end()) {
+      // bit more complicated, we need to also remove any connected edges
+      lemon::ListGraph::Node node = topo_nodes.at(DEV_ID);
 
-    for (lemon::ListGraph::IncEdgeIt edge_it(topo_graph, node);
-      edge_it != lemon::INVALID; ++edge_it) {
-      // get edge and corresponding LinkID
-      lemon::ListGraph::Edge edge(edge_it);
-      LinkID link_id = topo_links[edge].getLinkID();
-      // remove both!
-      topo_graph.erase(edge);
-      topo_edges.erase(link_id);
+      for (lemon::ListGraph::IncEdgeIt edge_it(topo_graph, node);
+        edge_it != lemon::INVALID; ++edge_it) {
+        // get edge and corresponding LinkID
+        lemon::ListGraph::Edge edge(edge_it);
+        LinkID link_id = topo_links[edge].getLinkID();
+        // remove both!
+        topo_graph.erase(edge);
+        topo_edges.erase(link_id);
+      }
+
+      // should now be safe to remove node
+      topo_graph.erase(node);
+      topo_nodes.erase(DEV_ID);
     }
-
-    // should now be safe to remove node
-    topo_graph.erase(node);
-    topo_nodes.erase(DEV_ID);
-
     return;
   }
 
@@ -141,30 +142,34 @@ namespace CostModel {
     return;
   }
 
-  void Topology::setLink(const DevID IDA, const DevID IDB, Link& link) {
-    const lemon::ListGraph::Node NODE_A = topo_nodes.at(IDA);
-    const lemon::ListGraph::Node NODE_B = topo_nodes.at(IDB);
+  void Topology::setLink(const DevID IDA, const DevID IDB, Link link) {
+    if (!linkExists(IDA, IDB)) {
+      const lemon::ListGraph::Node NODE_A = topo_nodes.at(IDA);
+      const lemon::ListGraph::Node NODE_B = topo_nodes.at(IDB);
 
-    // add edge to graph and get lemon Edge
-    lemon::ListGraph::Edge edge = topo_graph.addEdge(NODE_A, NODE_B);
+      // add edge to graph and get lemon Edge
+      lemon::ListGraph::Edge edge = topo_graph.addEdge(NODE_A, NODE_B);
 
-    // set link ID so we can use it for look-up later
-    link.setLinkID(IDA, IDB);
+      // set link ID so we can use it for look-up later
+      link.setLinkID(IDA, IDB);
 
-    // add link to EdgeMap
-    topo_links[edge] = link;
-    // ...and add edge to LinkID map...
-    topo_edges.emplace(link.getLinkID(), edge);
+      // add link to EdgeMap
+      topo_links[edge] = link;
+      // ...and add edge to LinkID map...
+      topo_edges.emplace(link.getLinkID(), edge);
+    }
 
     return;
   }
 
   void Topology::unsetLink(const DevID IDA, const DevID IDB) {
-    const LinkID LINK_ID = unorderedCantor(IDA, IDB);
-    const lemon::ListGraph::Edge EDGE = topo_edges.at(LINK_ID);
+    if (linkExists(IDA, IDB)) {
+      const LinkID LINK_ID = unorderedCantor(IDA, IDB);
+      const lemon::ListGraph::Edge EDGE = topo_edges.at(LINK_ID);
 
-    topo_graph.erase(EDGE);
-    topo_edges.erase(LINK_ID);
+      topo_graph.erase(EDGE);
+      topo_edges.erase(LINK_ID);
+    }
 
     return;
   }

@@ -31,11 +31,13 @@ namespace CostModel {
       Topology(const unsigned int, const Topology&, const NetworkType);
 
       NetworkType getNetworkType() const { return NETWORK_TYPE; }
+      unsigned int getNumDevices() const { return topo_nodes.size(); }
+      unsigned int getNumLinks() const { return topo_edges.size(); }
       void addDevice(const DevID);
       void addDevice(const std::vector<DevID>&);
       void removeDevice(const DevID);
       void removeDevice(const std::vector<DevID>&);
-      void setLink(const DevID, const DevID, Link&);
+      void setLink(const DevID, const DevID, Link);
       void unsetLink(const DevID, const DevID);
       bool linkExists(const DevID, const DevID) const;
       bool routeExists(const DevID, const DevID) const;
