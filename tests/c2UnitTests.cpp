@@ -1,9 +1,10 @@
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
+#include "utils.h"
 #include "Device.h"
 #include "Link.h"
-#include "utils.h"
 #include "DataLayout.h"
+#include "Topology.h"
 
 using namespace CostModel;
 
@@ -70,7 +71,7 @@ TEST_CASE("Link", "[unit]")
     const unsigned int INV_BW = 4E4;
     const DevID DEV_A = 5;
     const DevID DEV_B = 12;
-    const LinkID LID = CostModel::unorderedCantor(DEV_A, DEV_B);
+    const LinkID LID = unorderedCantor(DEV_A, DEV_B);
     Link link(LAT, INV_BW);
 
     link.setLinkID(DEV_B, DEV_A);
@@ -139,5 +140,148 @@ TEST_CASE("DataLayout", "[unit]")
   iter != COMPLEX_DOUBLE.getPattern().end(); ++iter) {
     REQUIRE(std::get<0>(*iter) == AccessType::BASIC);
     REQUIRE(std::get<1>(*iter) == 16);
+  }
+}
+
+TEST_CASE("Topology", "[unit]")
+{
+  const unsigned int NUM_DEVICES = 4;
+  const NetworkType DEFAULT_NET = NetworkType::PART_CONN_GRAPH;
+  const NetworkType FULL_NET = NetworkType::FULL_CONN_GRAPH;
+  std::vector<DevID> dev_id_vec = {1, 2, 4, 7};
+
+  SECTION("Initialisation") {
+    {
+      Topology topo(NUM_DEVICES);
+      REQUIRE(topo.getNetworkType() == DEFAULT_NET);
+      REQUIRE(topo.getNumDevices() == 0);
+      REQUIRE(topo.getNumLinks() == 0);
+    }
+    {
+      Topology topo(NUM_DEVICES, FULL_NET);
+      REQUIRE(topo.getNetworkType() == FULL_NET);
+      REQUIRE(topo.getNumDevices() == 0);
+      REQUIRE(topo.getNumLinks() == 0);
+    }
+    {
+      Topology topo(dev_id_vec.size(), dev_id_vec);
+      REQUIRE(topo.getNetworkType() == DEFAULT_NET);
+      REQUIRE(topo.getNumDevices() == dev_id_vec.size());
+      REQUIRE(topo.getNumLinks() == 0);
+    }
+    {
+      Topology topo(dev_id_vec.size(), dev_id_vec, FULL_NET);
+      REQUIRE(topo.getNetworkType() == FULL_NET);
+      REQUIRE(topo.getNumDevices() == dev_id_vec.size());
+      REQUIRE(topo.getNumLinks() == 0);
+    }
+    {
+      Topology old_topo(1);
+      Topology topo(NUM_DEVICES, old_topo);
+      REQUIRE(topo.getNetworkType() == DEFAULT_NET);
+      REQUIRE(topo.getNumDevices() == 0);
+      REQUIRE(topo.getNumLinks() == 0);
+    }
+    {
+      Topology old_topo(1);
+      Topology topo(NUM_DEVICES, old_topo, FULL_NET);
+      REQUIRE(topo.getNetworkType() == FULL_NET);
+      REQUIRE(topo.getNumDevices() == 0);
+      REQUIRE(topo.getNumLinks() == 0);
+    }
+  }
+
+  SECTION("Devices") {
+    Topology topo(NUM_DEVICES);
+
+    topo.addDevice(1);
+    topo.addDevice(2);
+    REQUIRE(topo.getNumDevices() == 2);
+    topo.addDevice(7);
+    topo.addDevice(5);
+    REQUIRE(topo.getNumDevices() == NUM_DEVICES);
+    topo.addDevice(5);
+    REQUIRE(topo.getNumDevices() == NUM_DEVICES);
+    topo.addDevice(6);
+    REQUIRE(topo.getNumDevices() == NUM_DEVICES+1);
+    REQUIRE(topo.getNumLinks() == 0);
+
+    topo.removeDevice(6);
+    REQUIRE(topo.getNumDevices() == NUM_DEVICES);
+    topo.removeDevice(3);
+    REQUIRE(topo.getNumDevices() == NUM_DEVICES);
+    topo.removeDevice(1);
+    topo.removeDevice(2);
+    topo.removeDevice(7);
+    topo.removeDevice(5);
+    REQUIRE(topo.getNumDevices() == 0);
+    topo.removeDevice(5);
+    REQUIRE(topo.getNumDevices() == 0);
+    REQUIRE(topo.getNumLinks() == 0);
+  }
+
+  SECTION("Links") {
+    std::vector<DevID> dev_id_vec = {1, 2, 3, 4};
+    Topology topo(dev_id_vec.size(), dev_id_vec);
+    const Link CABLE(200, 5);
+
+    for (DevID ida : dev_id_vec) {
+      for (DevID idb: dev_id_vec) {
+        REQUIRE_FALSE(topo.linkExists(ida, idb));
+      }
+    }
+
+    topo.setLink(1, 2, CABLE);
+    REQUIRE(topo.getNumLinks() == 1);
+    REQUIRE(topo.linkExists(2, 1));
+    topo.setLink(2, 1, CABLE);
+    REQUIRE(topo.getNumLinks() == 1);
+    REQUIRE(topo.linkExists(1, 2));
+
+    topo.unsetLink(3, 4);
+    REQUIRE(topo.getNumLinks() == 1);
+    topo.unsetLink(15, 17);
+    REQUIRE(topo.getNumLinks() == 1);
+    topo.unsetLink(1, 2);
+    REQUIRE(topo.getNumLinks() == 0);
+    REQUIRE_FALSE(topo.linkExists(1, 2));
+  }
+
+  SECTION("Route") {
+    std::vector<DevID> dev_id_vec = {1, 2, 3, 4};
+    Topology topo(dev_id_vec.size(), dev_id_vec);
+    const Link CABLE(200, 5);
+    std::vector<DevID> route(dev_id_vec.size());
+
+    for (auto iter = dev_id_vec.begin(); iter != dev_id_vec.end()-1; ++iter) {
+      topo.setLink(*iter, *(iter+1), CABLE);
+      REQUIRE(topo.routeExists(*iter, *(iter+1)));
+    }
+    REQUIRE(topo.routeExists(dev_id_vec.front(), dev_id_vec.back()));
+    route = topo.getMostDirectRoute(dev_id_vec.front(), dev_id_vec.back());
+    REQUIRE(route == dev_id_vec);
+
+    size_t mid = dev_id_vec.size() / 2;
+    topo.unsetLink(dev_id_vec.at(mid), dev_id_vec.at(mid+1));
+    route = topo.getMostDirectRoute(dev_id_vec.front(), dev_id_vec.back());
+    REQUIRE_FALSE(topo.routeExists(dev_id_vec.front(), dev_id_vec.back()));
+    REQUIRE(route.empty());
+
+    topo.setLink(dev_id_vec.front(), dev_id_vec.back(), CABLE);
+    route = topo.getMostDirectRoute(dev_id_vec.front(), dev_id_vec.back());
+    REQUIRE(topo.routeExists(dev_id_vec.front(), dev_id_vec.back()));
+    REQUIRE(route.size() == 2);
+    REQUIRE(route.at(0) == dev_id_vec.front());
+    REQUIRE(route.at(1) == dev_id_vec.back());
+
+    topo.setLink(dev_id_vec.at(mid), dev_id_vec.at(mid+1), CABLE);
+    route = topo.getMostDirectRoute(dev_id_vec.front(), dev_id_vec.back());
+    REQUIRE(route.size() == 2);
+    REQUIRE(route.at(0) == dev_id_vec.front());
+    REQUIRE(route.at(1) == dev_id_vec.back());
+
+    route = topo.getMostDirectRoute(dev_id_vec.back(), dev_id_vec.back());
+    REQUIRE(route.size() == 1);
+    REQUIRE(route.at(0) == dev_id_vec.back());
   }
 }
