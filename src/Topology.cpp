@@ -28,8 +28,7 @@ namespace CostModel {
     return;
   }
 
-  Topology::Topology(const unsigned int num_devices,
-    const NetworkType type = NetworkType::PART_CONN_GRAPH)
+  Topology::Topology(const unsigned int num_devices, const NetworkType type)
     : NETWORK_TYPE(type), topo_devs(topo_graph), topo_links(topo_graph) {
     // The node and edge maps should be updated with changes to the underlying
     // graph, but we will test this.
@@ -41,8 +40,7 @@ namespace CostModel {
   }
 
   Topology::Topology(const unsigned int num_devices,
-    const std::vector<DevID>& dev_vec,
-    const NetworkType type = NetworkType::PART_CONN_GRAPH)
+    const std::vector<DevID>& dev_vec, const NetworkType type)
     : NETWORK_TYPE(type), topo_devs(topo_graph), topo_links(topo_graph) {
     topo_graph.reserveNode(num_devices);
     topo_nodes.reserve(num_devices);

@@ -23,9 +23,10 @@ namespace CostModel {
       void reserveEdge(unsigned int, NetworkType);
 
     public:
-      Topology(const unsigned int, const NetworkType);
+      Topology(const unsigned int,
+        const NetworkType type = NetworkType::PART_CONN_GRAPH);
       Topology(const unsigned int, const std::vector<DevID>&,
-        const NetworkType);
+        const NetworkType type = NetworkType::PART_CONN_GRAPH);
       Topology(const unsigned int, const Topology&);
       Topology(const unsigned int, const Topology&, const NetworkType);
 
