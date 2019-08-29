@@ -10,16 +10,16 @@ namespace CostModel {
   Hardware::Hardware(const std::vector<std::tuple<std::string, Cost, Cost,
     double, unsigned int>>& device_info)
     : num_devices(device_info.size()),
-    topo(num_devices, NetworkType::PART_CONN_GRAPH) {
+    topo(num_devices, NetworkType::PART_CONN_GRAPH), NULLDEV(NULL) {
 
     std::vector<DevID> dev_ids;
 
     dev_ids.reserve(num_devices);
     devices.reserve(num_devices);
-    for (auto dev : device_info) {
-      Device new_dev = std::make_from_tuple<Device>(dev);
-      devices.push_back(new_dev);
-      dev_ids.push_back(new_dev.getID());
+    for (auto const& dev_info : device_info) {
+      devices.emplace_back(std::get<0>(dev_info), std::get<1>(dev_info),
+        std::get<2>(dev_info), std::get<3>(dev_info), std::get<4>(dev_info));
+      dev_ids.push_back(devices.back().getID());
     }
 
     topo.addDevice(dev_ids);
@@ -29,16 +29,17 @@ namespace CostModel {
 
   Hardware::Hardware(const std::vector<std::tuple<std::string, Cost, Cost,
     double, unsigned int>>& device_info, NetworkType net_type)
-    : num_devices(device_info.size()), topo(num_devices, net_type) {
+    : num_devices(device_info.size()), topo(num_devices, net_type),
+    NULLDEV(NULL) {
 
     std::vector<DevID> dev_ids;
 
     dev_ids.reserve(num_devices);
     devices.reserve(num_devices);
-    for (auto dev_info : device_info) {
-      Device dev = std::make_from_tuple<Device>(dev_info);
-      devices.push_back(dev);
-      dev_ids.push_back(dev.getID());
+    for (auto const& dev_info : device_info) {
+      devices.emplace_back(std::get<0>(dev_info), std::get<1>(dev_info),
+        std::get<2>(dev_info), std::get<3>(dev_info), std::get<4>(dev_info));
+      dev_ids.push_back(devices.back().getID());
     }
 
     topo.addDevice(dev_ids);
@@ -49,19 +50,16 @@ namespace CostModel {
   Hardware::Hardware(const std::vector<std::tuple<std::string, Cost, Cost,
     double, unsigned int>>& device_info, Hardware& old_hw)
     : num_devices(device_info.size() + old_hw.devices.size()),
-    topo(num_devices, old_hw.topo) {
+    devices(std::move(old_hw.devices)), topo(num_devices, old_hw.topo),
+    NULLDEV(NULL) {
 
     devices.reserve(num_devices);
 
-    for (Device dev : old_hw.devices) {
-      devices.push_back(dev);
-    }
-
-    std::vector<DevID> dev_ids(device_info.size());
-    for (auto dev_info : device_info) {
-      Device dev = std::make_from_tuple<Device>(dev_info);
-      devices.push_back(dev);
-      dev_ids.push_back(dev.getID());
+    std::vector<DevID> dev_ids;
+    for (auto const& dev_info : device_info) {
+      devices.emplace_back(std::get<0>(dev_info), std::get<1>(dev_info),
+        std::get<2>(dev_info), std::get<3>(dev_info), std::get<4>(dev_info));
+      dev_ids.push_back(devices.back().getID());
     }
 
     topo.addDevice(dev_ids);
@@ -72,19 +70,16 @@ namespace CostModel {
   Hardware::Hardware(const std::vector<std::tuple<std::string, Cost, Cost,
     double, unsigned int>>& device_info, Hardware& old_hw, NetworkType net_type)
     : num_devices(device_info.size() + old_hw.devices.size()),
-    topo(num_devices, old_hw.topo, net_type) {
+    devices(std::move(old_hw.devices)),
+    topo(num_devices, old_hw.topo, net_type), NULLDEV(NULL) {
 
     devices.reserve(num_devices);
 
-    for (Device dev : old_hw.devices) {
-      devices.push_back(dev);
-    }
-
-    std::vector<DevID> dev_ids(device_info.size());
-    for (auto dev_info : device_info) {
-      Device dev = std::make_from_tuple<Device>(dev_info);
-      devices.push_back(dev);
-      dev_ids.push_back(dev.getID());
+    std::vector<DevID> dev_ids;
+    for (auto const& dev_info : device_info) {
+      devices.emplace_back(std::get<0>(dev_info), std::get<1>(dev_info),
+        std::get<2>(dev_info), std::get<3>(dev_info), std::get<4>(dev_info));
+      dev_ids.push_back(devices.back().getID());
     }
 
     topo.addDevice(dev_ids);
@@ -93,16 +88,16 @@ namespace CostModel {
   }
 
   std::string Hardware::getDeviceName(const DevID DEV_ID) const {
-    for (Device dev : devices) {
+    for (const Device& dev : devices) {
       if (dev.getID() == DEV_ID) return dev.getName();
     }
     return std::string("NULL");
   }
 
-  const Device Hardware::getDevice(const DevID DEV_ID) const {
-    for (Device dev : devices) {
+  const Device& Hardware::getDevice(const DevID DEV_ID) const {
+    for (const Device& dev : devices) {
       if(dev.getID() == DEV_ID) return dev;
     }
-    return Device(NULL);
+    return NULLDEV;
   }
 }

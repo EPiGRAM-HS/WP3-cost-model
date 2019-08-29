@@ -14,6 +14,7 @@ namespace CostModel {
       unsigned int num_devices;
       std::vector<Device> devices;
       Topology topo;
+      const Device NULLDEV;
 
     public:
       Hardware() = delete;
@@ -28,7 +29,7 @@ namespace CostModel {
 
       std::string getDeviceName(const DevID) const;
       unsigned int getNumDevices() const { return num_devices; }
-      const Device getDevice(const DevID) const;
+      const Device& getDevice(const DevID) const;
       const std::vector<Device>& getDevices() const { return devices; }
       Topology& getTopology() { return topo; }
   };
