@@ -5,6 +5,7 @@
 #include "Link.h"
 #include "DataLayout.h"
 #include "Topology.h"
+#include "Access.h"
 
 using namespace CostModel;
 
@@ -283,5 +284,129 @@ TEST_CASE("Topology", "[unit]")
     route = topo.getMostDirectRoute(dev_id_vec.back(), dev_id_vec.back());
     REQUIRE(route.size() == 1);
     REQUIRE(route.at(0) == dev_id_vec.back());
+  }
+}
+
+TEST_CASE("Access", "[unit]") {
+  const AccessPattern AP_EMPTY;
+  const AccessPattern AP_FREE(1, std::make_pair(AccessType::FREE, 8));
+  const AccessPattern AP_BASIC(1, std::make_pair(AccessType::BASIC, 8));
+  const AccessPattern AP_EXPENSIVE(1,
+    std::make_pair(AccessType::EXPENSIVE, 8) );
+  const AccessPattern AP_STRIDED(
+    {std::make_pair(AccessType::EXPENSIVE, 1),
+    std::make_pair(AccessType::BASIC, 3),
+    std::make_pair(AccessType::EXPENSIVE, 1),
+    std::make_pair(AccessType::BASIC, 3)} );
+
+  const DataLayout DL_EMPTY(std::string("EMPTY"), 0, AP_EMPTY);
+  const DataLayout DL_FREE(std::string("FREE"), 8, AP_FREE);
+  const DataLayout DL_BASIC(std::string("BASIC"), 8, AP_BASIC);
+  const DataLayout DL_EXPENSIVE(std::string("EXPENSIVE"), 8, AP_EXPENSIVE);
+  const DataLayout DL_STRIDED(std::string("STRIDED"), 8, AP_STRIDED);
+
+  SECTION("Empty") {
+    Access access_one(AP_EMPTY, DL_EMPTY);
+    Access access_ten(AP_EMPTY, DL_EMPTY, 10);
+
+    REQUIRE(access_one.getReps() == 1);
+    REQUIRE(access_one.begin() == access_one.end());
+    REQUIRE(access_ten.getReps() == 10);
+    REQUIRE(access_ten.begin() == access_ten.end());
+  }
+
+  SECTION("Free") {
+    {
+      int count = 0;
+      Access access(AP_FREE, DL_FREE, 1);
+      REQUIRE(access.getReps() == 1);
+      for (auto ITER = access.begin(); ITER != access.end(); ++ITER) {
+        REQUIRE(std::get<0>(*ITER) == AccessType::FREE);
+        REQUIRE(std::get<1>(*ITER) == 8);
+        ++count;
+      }
+      REQUIRE(count == 8);
+    }
+
+    {
+      int count = 0;
+      Access access(AP_BASIC, DL_FREE, 2);
+      AccessPattern expected({std::make_pair(AccessType::BASIC, 1),
+        std::make_pair(AccessType::FREE, 7)});
+      REQUIRE(access.getReps() == 2);
+      for (auto ITER = access.begin(); ITER != access.end(); ++ITER) {
+        REQUIRE(std::get<0>(*ITER) == std::get<0>(expected.at(count % 2)));
+        REQUIRE(std::get<1>(*ITER) == std::get<1>(expected.at(count % 2)));
+        ++count;
+      }
+      REQUIRE(count == 16);
+    }
+
+    {
+      int count = 0;
+      Access access(AP_EXPENSIVE, DL_FREE, 2);
+      AccessPattern expected({std::make_pair(AccessType::EXPENSIVE, 1),
+        std::make_pair(AccessType::FREE, 7)});
+      REQUIRE(access.getReps() == 2);
+      for (auto ITER = access.begin(); ITER != access.end(); ++ITER) {
+        REQUIRE(std::get<0>(*ITER)
+          == std::get<0>(expected.at(count % expected.size())));
+        REQUIRE(std::get<1>(*ITER)
+          == std::get<1>(expected.at(count % expected.size())));
+        ++count;
+      }
+      REQUIRE(count == 16);
+    }
+
+    {
+      Access access(AP_BASIC, DL_EXPENSIVE);
+      AccessPattern expected(8, std::make_pair(AccessType::EXPENSIVE, 8));
+      REQUIRE(access.getReps() == 1);
+      int idx = 0;
+      for (auto ITER = access.begin(); ITER != access.end(); ++ITER) {
+        REQUIRE(std::get<0>(*ITER) == std::get<0>(expected.at(idx)));
+        REQUIRE(std::get<1>(*ITER) == std::get<1>(expected.at(idx)));
+        ++idx;
+      }
+    }
+
+    {
+      Access access(AP_BASIC, DL_STRIDED);
+      AccessPattern expected( {
+        std::make_pair(AccessType::EXPENSIVE, 1),
+        std::make_pair(AccessType::BASIC, 3),
+        std::make_pair(AccessType::EXPENSIVE, 1),
+        std::make_pair(AccessType::BASIC, 3)
+      } );
+      REQUIRE(access.getReps() == 1);
+      int idx = 0;
+      for (auto ITER = access.begin(); ITER != access.end(); ++ITER) {
+        REQUIRE(std::get<0>(*ITER)
+          == std::get<0>(expected.at(idx % expected.size())));
+        REQUIRE(std::get<1>(*ITER)
+          == std::get<1>(expected.at(idx % expected.size())));
+        ++idx;
+      }
+
+      {
+        Access access(AP_STRIDED, DL_BASIC);
+        AccessPattern expected( {
+          std::make_pair(AccessType::EXPENSIVE, 1),
+          std::make_pair(AccessType::BASIC, 7),
+          std::make_pair(AccessType::BASIC, 8),
+          std::make_pair(AccessType::BASIC, 8),
+          std::make_pair(AccessType::BASIC, 8)
+        } );
+        REQUIRE(access.getReps() == 1);
+        int idx = 0;
+        for (auto ITER = access.begin(); ITER != access.end(); ++ITER) {
+          REQUIRE(std::get<0>(*ITER)
+            == std::get<0>(expected.at(idx % expected.size())));
+          REQUIRE(std::get<1>(*ITER)
+            == std::get<1>(expected.at(idx % expected.size())));
+          ++idx;
+        }
+      }
+    }
   }
 }
