@@ -12,15 +12,15 @@ namespace CostModel {
     const AccessType DTYPE_FIRST = std::get<0>(LPATTERN.front());
 
     size_t unrolled_size = 0;
-    for (auto ACC : IN_PATTERN)
+    for (auto const& ACC : IN_PATTERN)
       unrolled_size += std::get<1>(ACC) * LPATTERN.size();
     out_pattern.reserve(unrolled_size);
 
-    for (auto ACC : IN_PATTERN) {
+    for (auto const& ACC : IN_PATTERN) {
       for (size_t rep = 0; rep < std::get<1>(ACC); ++rep) {
         if (std::get<0>(ACC) <= DTYPE_FIRST) {
           // cost is just that of underlying datatype
-          for (auto LACC : LPATTERN) out_pattern.push_back(LACC);
+          for (auto const& LACC : LPATTERN) out_pattern.push_back(LACC);
         } else {
           // cost of initial access should be promoted
           out_pattern.push_back(std::make_pair(std::get<0>(ACC), 1));
