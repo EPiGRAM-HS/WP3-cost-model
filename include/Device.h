@@ -29,6 +29,12 @@ namespace CostModel {
       : ID(next_id++), NAME(source.NAME), BAC(source.BAC), EAC(source.EAC),
       CAPACITY(source.CAPACITY), VECTOR_LENGTH(source.VECTOR_LENGTH) {};
 
+      Device(Device&& source) noexcept
+      : ID(std::move(source.ID)), NAME(std::move(source.NAME)),
+      BAC(std::move(source.BAC)), EAC(std::move(source.EAC)),
+      CAPACITY(std::move(source.CAPACITY)),
+      VECTOR_LENGTH(std::move(source.VECTOR_LENGTH)) {} ;
+
       bool isNull() const { return ID == 0; }
       DevID getID() const { return ID; }
       std::string getName() const { return NAME; }
