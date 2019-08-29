@@ -6,6 +6,7 @@
 #include "DataLayout.h"
 #include "Topology.h"
 #include "Access.h"
+#include "Hardware.h"
 
 using namespace CostModel;
 
@@ -315,7 +316,7 @@ TEST_CASE("Access", "[unit]") {
     REQUIRE(access_ten.begin() == access_ten.end());
   }
 
-  SECTION("Free") {
+  SECTION("Unrolling") {
     {
       int count = 0;
       Access access(AP_FREE, DL_FREE, 1);
@@ -408,5 +409,136 @@ TEST_CASE("Access", "[unit]") {
         }
       }
     }
+  }
+}
+
+TEST_CASE("Hardware", "[unit]")
+{
+  typedef std::vector<std::tuple<std::string, Cost, Cost, double, unsigned int>>
+    DevInfoVec;
+  typedef std::tuple<std::string, Cost, Cost, double, unsigned int> DevInfo;
+
+  const DevInfo L1(std::string("L1"), 1, 2, 32768, 512);
+  const DevInfo L2(std::string("L2"), 10, 20, 262144, 0);
+  const DevInfo L3(std::string("L3"), 100, 200, 2.097e6, 0);
+  const DevInfo DRAM(std::string("DRAM"), 10000, 20000, 6.872E10, 0);
+  const DevInfo GPU(std::string("GPU"), 1000, 2000, 8.59E9, 16);
+
+  DevInfoVec device_info( { L1, L2, L3, DRAM, GPU } );
+
+  SECTION("device_info only") {
+    Hardware hardware(device_info);
+    REQUIRE(hardware.getNumDevices() == device_info.size());
+    REQUIRE(hardware.getTopology().getNetworkType()
+      == NetworkType::PART_CONN_GRAPH);
+    REQUIRE(hardware.getTopology().getNumDevices() == device_info.size());
+    REQUIRE(hardware.getTopology().getNumLinks() == 0);
+
+    DevID devID = 1;
+    for (const Device& dev : hardware.getDevices()) {
+      REQUIRE(dev.getID() == devID);
+      ++devID;
+    }
+
+    for (DevID devID = 1; devID <= device_info.size(); ++devID) {
+      REQUIRE_THAT(hardware.getDeviceName(devID),
+        Catch::Equals(std::get<0>(device_info.at(devID-1))));
+    }
+
+    REQUIRE(hardware.getDevice(10).isNull());
+  }
+
+  SECTION("device_info and net_type") {
+    Hardware hardware(device_info, NetworkType::FULL_CONN_GRAPH);
+    REQUIRE(hardware.getNumDevices() == device_info.size());
+    REQUIRE(hardware.getTopology().getNetworkType()
+      == NetworkType::FULL_CONN_GRAPH);
+    REQUIRE(hardware.getTopology().getNumDevices() == device_info.size());
+    REQUIRE(hardware.getTopology().getNumLinks() == 0);
+
+    const DevID first_devID = 6;
+    DevID devID = first_devID;
+    for (const Device& dev : hardware.getDevices()) {
+      REQUIRE(dev.getID() == devID);
+      ++devID;
+    }
+
+    int idx = 0;
+    for (DevID devID = first_devID; devID < first_devID + device_info.size();
+      ++devID) {
+      REQUIRE_THAT(hardware.getDeviceName(devID),
+        Catch::Equals(std::get<0>(device_info.at(idx))));
+      ++idx;
+    }
+
+    REQUIRE(hardware.getDevice(1).isNull());
+  }
+
+  SECTION("device_info and old_hw") {
+    Hardware old_hardware(device_info);
+    const DevInfo GPU2(std::string("GPU2"), 1000, 2000, 8.59E9, 16);
+    DevInfoVec add_hw(1, GPU2);
+
+    const int NUM_DEVICES = device_info.size() + add_hw.size();
+
+    std::vector<DevID> old_ids;
+    for (const Device& dev : old_hardware.getDevices())
+      old_ids.push_back(dev.getID());
+
+    Hardware hardware(add_hw, old_hardware);
+
+    REQUIRE(hardware.getNumDevices() == NUM_DEVICES);
+    REQUIRE(hardware.getTopology().getNetworkType()
+      == NetworkType::PART_CONN_GRAPH);
+    REQUIRE(hardware.getTopology().getNumDevices() == NUM_DEVICES);
+    REQUIRE(hardware.getTopology().getNumLinks() == 0);
+
+    std::vector<DevID> ids;
+    for (size_t idx = 0; idx < device_info.size(); ++idx) {
+      REQUIRE(old_ids.at(idx) == hardware.getDevices().at(idx).getID());
+      ids.push_back(hardware.getDevices().at(idx).getID());
+    }
+
+    DevID devID = old_ids.back() + 1;
+    for (int idx = device_info.size(); idx < NUM_DEVICES; ++idx) {
+      REQUIRE(hardware.getDevices().at(idx).getID() == devID);
+      ++devID;
+    }
+
+    REQUIRE(hardware.getDevice(1).isNull());
+  }
+
+  SECTION("device_info, old_hw, and net_type") {
+    Hardware old_hardware(device_info);
+    const DevInfo GPU2(std::string("GPU2"), 1000, 2000, 8.59E9, 16);
+    DevInfoVec add_hw(1, GPU2);
+
+    const int NUM_DEVICES = device_info.size() + add_hw.size();
+
+    std::vector<DevID> old_ids;
+    for (const Device& dev : old_hardware.getDevices())
+      old_ids.push_back(dev.getID());
+
+    Hardware hardware(add_hw, old_hardware, NetworkType::FULL_CONN_GRAPH);
+
+    REQUIRE(hardware.getNumDevices() == NUM_DEVICES);
+    REQUIRE(hardware.getTopology().getNetworkType()
+      == NetworkType::FULL_CONN_GRAPH);
+    REQUIRE(hardware.getTopology().getNumDevices() == NUM_DEVICES);
+    REQUIRE(hardware.getTopology().getNumLinks() == 0);
+
+    std::vector<DevID> ids;
+    for (size_t idx = 0; idx < device_info.size(); ++idx) {
+      REQUIRE(old_ids.at(idx) == hardware.getDevices().at(idx).getID());
+      ids.push_back(hardware.getDevices().at(idx).getID());
+    }
+
+    DevID devID = old_ids.back() + 1;
+    for (int idx = device_info.size(); idx < NUM_DEVICES; ++idx) {
+      REQUIRE(hardware.getDevices().at(idx).getID() == devID);
+      ++devID;
+    }
+
+    REQUIRE(hardware.getDevice(1).isNull());
   }
 }
