@@ -36,6 +36,9 @@ namespace CostModel {
         known_data_layouts.erase(name);
         return;
       }
+      const DataLayout& getDataLayout(const std::string NAME) const {
+        return known_data_layouts.at(NAME);
+      }
 
       // cost to access data in a particular pattern on a particular device
       Cost accessCost(const DevID DEV_ID, const DataLayout& LAYOUT,
