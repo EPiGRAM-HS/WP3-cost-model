@@ -7,6 +7,7 @@
 #include "Topology.h"
 #include "Access.h"
 #include "Hardware.h"
+#include "CostModel.h"
 
 using namespace CostModel;
 
@@ -540,5 +541,63 @@ TEST_CASE("Hardware", "[unit]")
     }
 
     REQUIRE(hardware.getDevice(1).isNull());
+  }
+}
+
+TEST_CASE("BasicCostModel", "[unit]")
+{
+  typedef std::vector<std::tuple<std::string, Cost, Cost, double, unsigned int>>
+    DevInfoVec;
+  typedef std::tuple<std::string, Cost, Cost, double, unsigned int> DevInfo;
+
+  const DevInfo L1(std::string("L1"), 1, 2, 32768, 512);
+  const DevInfo L2(std::string("L2"), 10, 20, 262144, 0);
+  const DevInfo L3(std::string("L3"), 100, 200, 2.097e6, 0);
+  const DevInfo DRAM(std::string("DRAM"), 10000, 20000, 6.872E10, 0);
+  const DevInfo GPU(std::string("GPU"), 1000, 2000, 8.59E9, 16);
+
+  DevInfoVec device_info( { L1, L2, L3, DRAM, GPU } );
+  const size_t NUM_DEVICES = device_info.size();
+
+  BasicCostModel model(device_info);
+
+  SECTION("check hardware") {
+    const Hardware& hw = model.getHardware();
+    REQUIRE(hw.getNumDevices() == NUM_DEVICES);
+
+    const std::vector<Device>& DEVICES = hw.getDevices();
+    int idx = 0;
+    for (const auto DEV : DEVICES) {
+      REQUIRE_THAT(DEV.getName(),
+        Catch::Equals(std::get<0>(device_info.at(idx))));
+        ++idx;
+    }
+  }
+
+  SECTION("known_data_layouts") {
+    const DataLayout& BYTE = model.getDataLayout(std::string("CM_BYTE"));
+    REQUIRE_THAT(BYTE.getName(), Catch::Equals(std::string("CM_BYTE")));
+
+    const std::string STR_DBL("DL_DOUBLE");
+    AccessPattern ap_dbl(1, std::make_pair(AccessType::BASIC, 8));
+
+    model.addDataLayout(STR_DBL, 8, ap_dbl);
+    REQUIRE_THAT(model.getDataLayout(STR_DBL).getName(),Catch::Equals(STR_DBL));
+
+    model.rmDataLayout(STR_DBL);
+    REQUIRE_THROWS_AS(model.getDataLayout(STR_DBL), std::out_of_range);
+  }
+
+  SECTION("zero costs") {
+    const Cost FREE_BEER = 0;
+    DevID id_DRAM;
+    AccessPattern ap_free(1, std::make_pair(AccessType::FREE, 1));
+    const DataLayout DL_FREE(std::string("DL_FREE"), 1, ap_free);
+
+    for (const auto DEV : model.getHardware().getDevices()) {
+      if (!DEV.getName().compare("DRAM")) id_DRAM = DEV.getID();
+    }
+
+    REQUIRE(model.accessCost(id_DRAM, DL_FREE, ap_free, 1) == FREE_BEER);
   }
 }
