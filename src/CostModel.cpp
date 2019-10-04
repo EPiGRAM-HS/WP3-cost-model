@@ -40,7 +40,7 @@ namespace CostModel {
 
     const std::vector<DevID>
       route = hw.getTopology().getMostDirectRoute(DEV_SRC, DEV_DEST);
-    Cost transport_cost = AccessType::EXPENSIVE * route.size();
+    Cost transport_cost = AccessType::EXPENSIVE * (route.size()-1);
 
     return read_cost + write_cost + transport_cost;
   }
