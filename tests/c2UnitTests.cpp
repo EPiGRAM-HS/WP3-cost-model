@@ -567,7 +567,7 @@ TEST_CASE("BasicCostModel", "[unit]")
 
     const std::vector<Device>& DEVICES = hw.getDevices();
     int idx = 0;
-    for (const auto DEV : DEVICES) {
+    for (const auto& DEV : DEVICES) {
       REQUIRE_THAT(DEV.getName(),
         Catch::Equals(std::get<0>(device_info.at(idx))));
         ++idx;
@@ -588,16 +588,17 @@ TEST_CASE("BasicCostModel", "[unit]")
     REQUIRE_THROWS_AS(model.getDataLayout(STR_DBL), std::out_of_range);
   }
 
-  SECTION("zero costs") {
+  SECTION("single device costs") {
     const Cost FREE_BEER = 0;
-    DevID id_DRAM;
     AccessPattern ap_free(1, std::make_pair(AccessType::FREE, 1));
     const DataLayout DL_FREE(std::string("DL_FREE"), 1, ap_free);
 
-    for (const auto DEV : model.getHardware().getDevices()) {
-      if (!DEV.getName().compare("DRAM")) id_DRAM = DEV.getID();
+    for (const auto& DEV : model.getHardware().getDevices()) {
+      REQUIRE(model.accessCost(DEV.getID(), DL_FREE, ap_free, 1) == FREE_BEER);
+      // movement model assumes worst case access cost at either end
+      REQUIRE(model.movementCost(DEV.getID(), DL_FREE, DEV.getID(), DL_FREE)
+              == 2 * DEV.getExpensiveAccessCost(1));
     }
 
-    REQUIRE(model.accessCost(id_DRAM, DL_FREE, ap_free, 1) == FREE_BEER);
   }
 }
