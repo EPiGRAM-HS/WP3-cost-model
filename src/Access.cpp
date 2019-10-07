@@ -3,8 +3,8 @@
 
 namespace CostModel {
   const AccessPattern Access::unrollAccessPattern(
-    const AccessPattern& IN_PATTERN, const DataLayout& layout) {
-    const AccessPattern& LPATTERN = layout.getPattern();
+    const AccessPattern& IN_PATTERN, const DataLayout& LAYOUT) {
+    const AccessPattern& LPATTERN = LAYOUT.getPattern();
     AccessPattern out_pattern;
 
     if (LPATTERN.empty() || IN_PATTERN.empty()) return out_pattern;
