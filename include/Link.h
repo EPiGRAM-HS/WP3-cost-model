@@ -13,7 +13,7 @@ namespace CostModel {
 
     public:
       Link() : latency(0), inverse_bw(0) {};
-      Link(unsigned int lat, double inv_bw)
+      Link(unsigned int lat, unsigned int inv_bw)
       : latency(lat), inverse_bw(inv_bw) {};
 
       Link& operator+=(const Link& RHS) {
