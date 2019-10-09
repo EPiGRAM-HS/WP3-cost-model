@@ -26,6 +26,13 @@ namespace CostModel {
         unsigned int>>&, Hardware&);
       Hardware(const std::vector<std::tuple<std::string, Cost, Cost, double,
         unsigned int>>&, Hardware&, NetworkType);
+      Hardware(const Hardware& src) :
+      num_devices(src.num_devices), devices(src.devices),
+      topo(num_devices, src.topo), NULLDEV(NULL) {};
+
+      void printDevices() const;
+      void printTopology() const;
+      void displayTopology(const std::string&, const std::string&) const;
 
       std::string getDeviceName(const DevID) const;
       unsigned int getNumDevices() const { return num_devices; }
