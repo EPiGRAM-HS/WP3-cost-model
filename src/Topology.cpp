@@ -4,6 +4,8 @@
 #include "Topology.h"
 #include "lemon/bfs.h"
 #include "lemon/dijkstra.h"
+#include "lemon/lgf_writer.h"
+#include "lemon/graph_to_eps.h"
 
 namespace CostModel {
   void Topology::reserveEdge(unsigned int num_devices, NetworkType type) {
@@ -93,6 +95,21 @@ namespace CostModel {
       reserveEdge(num_devices, NETWORK_TYPE);
     }
 
+    return;
+  }
+
+  void Topology::graphWriter() const {
+    lemon::graphWriter(topo_graph)
+      .edgeMap("Links", topo_links)
+      .nodeMap("Devices", topo_devs)
+      .run();
+
+    return;
+  }
+
+  void Topology::graphDisplay(const std::string& TITLE,
+  const std::string& FNAME) const {
+    lemon::graphToEps(topo_graph, FNAME).title(TITLE).run();
     return;
   }
 

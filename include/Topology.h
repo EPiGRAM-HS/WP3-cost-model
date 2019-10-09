@@ -30,6 +30,9 @@ namespace CostModel {
       Topology(const unsigned int, const Topology&);
       Topology(const unsigned int, const Topology&, const NetworkType);
 
+      void graphWriter() const;
+      void graphDisplay(const std::string&, const std::string&) const;
+
       NetworkType getNetworkType() const { return NETWORK_TYPE; }
       unsigned int getNumDevices() const { return topo_nodes.size(); }
       unsigned int getNumLinks() const { return topo_edges.size(); }
