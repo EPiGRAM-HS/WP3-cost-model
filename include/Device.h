@@ -2,6 +2,7 @@
 #define DEVICE_H
 
 #include <string>
+#include <iostream>
 #include "typedefs.h"
 
 namespace CostModel {
@@ -34,6 +35,9 @@ namespace CostModel {
       BAC(std::move(source.BAC)), EAC(std::move(source.EAC)),
       CAPACITY(std::move(source.CAPACITY)),
       VECTOR_LENGTH(std::move(source.VECTOR_LENGTH)) {} ;
+
+      friend std::ostream& operator<<(std::ostream& os, const Device& DEV) 
+        { return os << DEV.ID; }
 
       bool isNull() const { return ID == 0; }
       DevID getID() const { return ID; }

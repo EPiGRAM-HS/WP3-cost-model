@@ -1,6 +1,7 @@
 #ifndef LINK_H
 #define LINK_H
 
+#include <iostream>
 #include "typedefs.h"
 #include "utils.h"
 
@@ -24,6 +25,9 @@ namespace CostModel {
         return *this;
       }
       friend Link operator+(Link lhs, const Link& RHS) { return lhs += RHS; }
+
+      friend std::ostream& operator<<(std::ostream& os, const Link& LINK) 
+        { return os << LINK.link_id; }
 
       void setLinkID(const DevID A, const DevID B) {
         link_id = unorderedCantor(A, B);
