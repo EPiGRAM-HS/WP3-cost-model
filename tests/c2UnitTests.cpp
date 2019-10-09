@@ -287,6 +287,30 @@ TEST_CASE("Topology", "[unit]")
     REQUIRE(route.size() == 1);
     REQUIRE(route.at(0) == dev_id_vec.back());
   }
+
+  SECTION("Output") {
+    std::vector<DevID> dev_id_vec = {1, 2, 3, 4, 5};
+    Topology topo(dev_id_vec.size(), dev_id_vec);
+    const Link CABLE(200, 5);
+    const std::string TITLE("Topology Test");
+    const std::string FNAME("topo_test.eps");
+
+    for (size_t i = 0; i < dev_id_vec.size() - 1; ++i) {
+      for (size_t j = i+1; j < dev_id_vec.size(); ++j) {
+        topo.setLink(dev_id_vec[i], dev_id_vec[j], CABLE);
+      }
+    }
+
+    REQUIRE_NOTHROW(topo.graphWriter());
+    REQUIRE_NOTHROW(topo.graphDisplay(TITLE, FNAME));
+
+    FILE * feps = fopen(FNAME.c_str(), "r");
+    REQUIRE(feps != NULL);
+    if (feps != NULL) {
+      fclose(feps);
+      remove(FNAME.c_str());
+    }
+  }
 }
 
 TEST_CASE("Access", "[unit]") {
@@ -541,6 +565,30 @@ TEST_CASE("Hardware", "[unit]")
     }
 
     REQUIRE(hardware.getDevice(1).isNull());
+  }
+
+  SECTION("Output") {
+    Hardware hardware(device_info, NetworkType::FULL_CONN_GRAPH);
+    const std::string FNAME("test_hw.eps");
+    const std::string TITLE("Hardware Test");
+    const std::vector<Device>& DEVS = hardware.getDevices();
+    const Link CABLE(200, 5);
+
+    for (size_t i = 0; i < DEVS.size()-1; ++i) {
+      for (size_t j = i+1; j < DEVS.size(); ++j) {
+        hardware.getTopology().setLink(DEVS[i].getID(), DEVS[j].getID(), CABLE);
+      }
+    }
+
+    REQUIRE_NOTHROW(hardware.printDevices());
+    REQUIRE_NOTHROW(hardware.printTopology());
+    REQUIRE_NOTHROW(hardware.displayTopology(TITLE, FNAME));
+    FILE * feps = fopen(FNAME.c_str(), "r");
+    REQUIRE(feps != NULL);
+    if (feps != NULL) {
+      fclose(feps);
+      remove(FNAME.c_str());
+    }
   }
 }
 
