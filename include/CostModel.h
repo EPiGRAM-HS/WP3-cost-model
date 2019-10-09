@@ -25,8 +25,10 @@ namespace CostModel {
       BasicCostModel(const std::vector<std::tuple<std::string, Cost, Cost,
         double, unsigned int>>& hw_info)
         : hardware(hw_info) { defaultLayouts(); }
+      BasicCostModel(Hardware& hw) : hardware(hw) { defaultLayouts(); }
 
       Hardware& getHardware() { return hardware; }
+
       void addDataLayout(std::string name, unsigned int extent,
         AccessPattern& ap) {
         known_data_layouts.emplace(name, DataLayout(name, extent, ap));
