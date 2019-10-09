@@ -12,3 +12,5 @@ target_compile_options(costmodel
 target_include_directories(costmodel
   PUBLIC ${CMAKE_SOURCE_DIR}/include ${LEMON_INCLUDE_DIR}
 )
+
+target_link_libraries(costmodel PUBLIC ${LEMON_LIBRARIES})
