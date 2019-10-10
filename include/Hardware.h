@@ -1,6 +1,7 @@
 #ifndef HARDWARE_H
 #define HARDWARE_H
 
+#include <iostream>
 #include <vector>
 #include <tuple>
 #include <string>
@@ -30,8 +31,8 @@ namespace CostModel {
       num_devices(src.num_devices), devices(src.devices),
       topo(num_devices, src.topo), NULLDEV(NULL) {};
 
-      void printDevices() const;
-      void printTopology() const;
+      void printDevices(std::ostream& os = std::cout) const;
+      void printTopology(std::ostream& os = std::cout) const;
       void displayTopology(const std::string&, const std::string&) const;
 
       std::string getDeviceName(const DevID) const;

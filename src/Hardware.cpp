@@ -87,19 +87,20 @@ namespace CostModel {
     return;
   }
 
-  void Hardware::printDevices() const {
-    std::cout << "Hardware device list:\n" << "  NAME  :  ID" << std::endl;
+  void Hardware::printDevices(std::ostream& os) const {
+    os << "Hardware device list:\n" << "  NAME  :  ID\n";
     for (const Device& dev : devices) {
-      std::cout << "  " <<  dev.getName() << "  :  " << dev.getID()
-      << std::endl;
+      os << "  " <<  dev.getName() << "  :  " << dev.getID()
+      << "\n";
     }
-    std::cout << std::endl;
+    os << "\n";
 
     return;
   }
 
-  void Hardware::printTopology() const {
-    topo.graphWriter();
+  void Hardware::printTopology(std::ostream& os) const {
+    topo.graphWriter(os);
+    os << "\n";
     return;
   }
 

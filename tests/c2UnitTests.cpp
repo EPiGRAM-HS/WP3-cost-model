@@ -301,7 +301,7 @@ TEST_CASE("Topology", "[unit]")
       }
     }
 
-    REQUIRE_NOTHROW(topo.graphWriter());
+    REQUIRE_NOTHROW(topo.graphWriter(std::cout));
     REQUIRE_NOTHROW(topo.graphDisplay(TITLE, FNAME));
 
     FILE * feps = fopen(FNAME.c_str(), "r");

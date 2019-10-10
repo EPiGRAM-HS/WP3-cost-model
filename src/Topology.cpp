@@ -98,8 +98,8 @@ namespace CostModel {
     return;
   }
 
-  void Topology::graphWriter() const {
-    lemon::graphWriter(topo_graph)
+  void Topology::graphWriter(std::ostream& os) const {
+    lemon::graphWriter(topo_graph, os)
       .edgeMap("Links", topo_links)
       .nodeMap("Devices", topo_devs)
       .run();
