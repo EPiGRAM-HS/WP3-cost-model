@@ -9,12 +9,12 @@ namespace CostModel {
   class Link {
     private:
       LinkID link_id;
-      unsigned int latency;     // in nanoseconds
-      unsigned int inverse_bw;  // in nanoseconds per bit
+      Cost latency;     // startup Cost
+      Cost inverse_bw;  // Cost per byte
 
     public:
       Link() : latency(0), inverse_bw(0) {};
-      Link(unsigned int lat, unsigned int inv_bw)
+      Link(Cost lat, Cost inv_bw)
       : latency(lat), inverse_bw(inv_bw) {};
 
       Link& operator+=(const Link& RHS) {
@@ -26,7 +26,7 @@ namespace CostModel {
       }
       friend Link operator+(Link lhs, const Link& RHS) { return lhs += RHS; }
 
-      friend std::ostream& operator<<(std::ostream& os, const Link& LINK) 
+      friend std::ostream& operator<<(std::ostream& os, const Link& LINK)
         { return os << LINK.link_id; }
 
       void setLinkID(const DevID A, const DevID B) {
@@ -34,8 +34,8 @@ namespace CostModel {
         return;
       }
       LinkID getLinkID() const { return link_id; }
-      unsigned int getLatency() const { return latency; }
-      unsigned int getInverseBW() const { return inverse_bw; }
+      Cost getLatency() const { return latency; }
+      Cost getInverseBW() const { return inverse_bw; }
   };
 }
 
