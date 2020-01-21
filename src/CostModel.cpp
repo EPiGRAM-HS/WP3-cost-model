@@ -4,7 +4,38 @@
 #include "Access.h"
 
 namespace CostModel {
-  Cost BasicCostModel::accessCost(const DevID DEV_ID, const DataLayout& LAYOUT,
+  bool CostModel::movementDecision(const DevID DEV_SRC,
+    const DataLayout& LAYOUT_SRC, const DevID DEV_DEST,
+    const DataLayout& LAYOUT_DEST, const AccessPattern& AP,
+    const unsigned int COUNT, Hardware& hw) {
+    bool decision = false;
+
+    Cost access_src = _accessCost(DEV_SRC, LAYOUT_SRC, AP, COUNT, hw);
+    Cost access_dest = _accessCost(DEV_DEST, LAYOUT_DEST, AP, COUNT, hw);
+    Cost move_cost = COUNT * _movementCost(DEV_SRC, LAYOUT_SRC, DEV_DEST,
+                              LAYOUT_DEST, hw);
+
+    if (access_dest + move_cost < access_src) decision = true;
+
+    return decision;
+  }
+
+  DevID CostModel::recommendDevice(const DataLayout& LAYOUT,
+    const AccessPattern& AP, const unsigned int COUNT, const Hardware& HARDWARE)
+  {
+    DevID winner = 0;
+    Cost lowest_cost = std::numeric_limits<Cost>::max();
+
+    for (auto dev_iter = HARDWARE.getDevices().begin();
+      dev_iter != HARDWARE.getDevices().end(); ++dev_iter) {
+      Cost cost = _accessCost(dev_iter->getID(), LAYOUT, AP, COUNT, HARDWARE);
+      if (cost < lowest_cost) winner = dev_iter->getID();
+    }
+
+    return winner;
+  }
+
+  Cost BasicCostModel::_accessCost(const DevID DEV_ID, const DataLayout& LAYOUT,
   const AccessPattern& AP, const unsigned int COUNT, const Hardware& HARDWARE) {
     const Cost BAC = HARDWARE.getDevice(DEV_ID).getBasicAccessCost(1);
     const Cost EAC = HARDWARE.getDevice(DEV_ID).getExpensiveAccessCost(1);
@@ -28,51 +59,20 @@ namespace CostModel {
     return total;
   }
 
-  Cost BasicCostModel::movementCost(const DevID DEV_SRC,
+  Cost BasicCostModel::_movementCost(const DevID DEV_SRC,
     const DataLayout& LAYOUT_SRC, const DevID DEV_DEST,
     const DataLayout& LAYOUT_DEST, Hardware& hw) {
     const AccessPattern WORST_AP(1, std::make_pair(AccessType::EXPENSIVE, 1));
 
     // this is a very bad model
 
-    Cost read_cost = accessCost(DEV_SRC, LAYOUT_SRC, WORST_AP, 1, hw);
-    Cost write_cost = accessCost(DEV_DEST, LAYOUT_DEST, WORST_AP, 1, hw);
+    Cost read_cost = _accessCost(DEV_SRC, LAYOUT_SRC, WORST_AP, 1, hw);
+    Cost write_cost = _accessCost(DEV_DEST, LAYOUT_DEST, WORST_AP, 1, hw);
 
     const std::vector<DevID>
       route = hw.getTopology().getMostDirectRoute(DEV_SRC, DEV_DEST);
     Cost transport_cost = AccessType::EXPENSIVE * (route.size()-1);
 
     return read_cost + write_cost + transport_cost;
-  }
-
-  bool BasicCostModel::movementDecision(const DevID DEV_SRC,
-    const DataLayout& LAYOUT_SRC, const DevID DEV_DEST,
-    const DataLayout& LAYOUT_DEST, const AccessPattern& AP,
-    const unsigned int COUNT, Hardware& hw) {
-    bool decision = false;
-
-    Cost access_src = accessCost(DEV_SRC, LAYOUT_SRC, AP, COUNT, hw);
-    Cost access_dest = accessCost(DEV_DEST, LAYOUT_DEST, AP, COUNT, hw);
-    Cost move_cost = COUNT * movementCost(DEV_SRC, LAYOUT_SRC, DEV_DEST,
-                              LAYOUT_DEST, hw);
-
-    if (access_dest + move_cost < access_src) decision = true;
-
-    return decision;
-  }
-
-  DevID BasicCostModel::recommendDevice(const DataLayout& LAYOUT,
-    const AccessPattern& AP, const unsigned int COUNT, const Hardware& HARDWARE)
-  {
-    DevID winner = 0;
-    Cost lowest_cost = std::numeric_limits<Cost>::max();
-
-    for (auto dev_iter = HARDWARE.getDevices().begin();
-      dev_iter != HARDWARE.getDevices().end(); ++dev_iter) {
-      Cost cost = accessCost(dev_iter->getID(), LAYOUT, AP, COUNT, HARDWARE);
-      if (cost < lowest_cost) winner = dev_iter->getID();
-    }
-
-    return winner;
   }
 }

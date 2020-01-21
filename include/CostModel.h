@@ -8,7 +8,7 @@
 #include "DataLayout.h"
 
 namespace CostModel {
-  class BasicCostModel {
+  class CostModel {
     protected:
       Hardware hardware;
       std::unordered_map<std::string, DataLayout> known_data_layouts;
@@ -20,11 +20,17 @@ namespace CostModel {
         return;
       }
 
+      virtual Cost _accessCost(const DevID, const DataLayout&,
+        const AccessPattern&, const unsigned int, const Hardware&) = 0;
+
+      virtual Cost _movementCost(const DevID, const DataLayout&, const DevID,
+        const DataLayout&, Hardware&) = 0;
+
     public:
-      BasicCostModel() = delete;
-      BasicCostModel(const std::vector<DevInfo>& hw_info)
+      CostModel() = delete;
+      CostModel(const std::vector<DevInfo>& hw_info)
         : hardware(hw_info) { defaultLayouts(); }
-      BasicCostModel(Hardware& hw) : hardware(hw) { defaultLayouts(); }
+      CostModel(Hardware& hw) : hardware(hw) { defaultLayouts(); }
 
       Hardware& getHardware() { return hardware; }
 
@@ -44,17 +50,21 @@ namespace CostModel {
       // cost to access data in a particular pattern on a particular device
       Cost accessCost(const DevID DEV_ID, const DataLayout& LAYOUT,
         const AccessPattern& AP, const unsigned int COUNT)
-        { return accessCost(DEV_ID, LAYOUT, AP, COUNT, hardware); }
-      Cost accessCost(const DevID, const DataLayout&, const AccessPattern&,
-        const unsigned int, const Hardware&);
+        { return _accessCost(DEV_ID, LAYOUT, AP, COUNT, hardware); }
+      Cost accessCost(const DevID DEV_ID, const DataLayout& LAYOUT,
+        const AccessPattern& AP, const unsigned int COUNT, Hardware& hw)
+        { return _accessCost(DEV_ID, LAYOUT, AP, COUNT, hw); }
+
 
       // cost to move data from device A to device B
       Cost movementCost(const DevID DEV_SRC, const DataLayout& LAYOUT_SRC,
         const DevID DEV_DEST, const DataLayout& LAYOUT_DEST)
-        { return movementCost(DEV_SRC, LAYOUT_SRC, DEV_DEST, LAYOUT_DEST,
+        { return _movementCost(DEV_SRC, LAYOUT_SRC, DEV_DEST, LAYOUT_DEST,
           hardware); }
-      Cost movementCost(const DevID, const DataLayout&, const DevID,
-        const DataLayout&, Hardware&);
+      Cost movementCost(const DevID DEV_SRC, const DataLayout& LAYOUT_SRC,
+        const DevID DEV_DEST, const DataLayout& LAYOUT_DEST, Hardware& hw)
+        { return _movementCost(DEV_SRC, LAYOUT_SRC, DEV_DEST, LAYOUT_DEST,
+          hw); }
 
       // should data be moved from device A to device B?
       bool movementDecision(const DevID DEV_SRC, const DataLayout& LAYOUT_SRC,
@@ -73,6 +83,23 @@ namespace CostModel {
       DevID recommendDevice(const DataLayout&, const AccessPattern&,
         const unsigned int, const Hardware&);
   };
+
+  class BasicCostModel : public CostModel {
+    public:
+      BasicCostModel() = delete;
+      BasicCostModel(const std::vector<DevInfo>& hw_info)
+        : CostModel(hw_info) {}
+      BasicCostModel(Hardware& hw) : CostModel(hw) {}
+
+      // cost to access data in a particular pattern on a particular device
+      Cost _accessCost(const DevID, const DataLayout&, const AccessPattern&,
+        const unsigned int, const Hardware&);
+
+      // cost to move data from device A to device B
+      Cost _movementCost(const DevID, const DataLayout&, const DevID,
+        const DataLayout&, Hardware&);
+  };
+
 }
 
 #endif
