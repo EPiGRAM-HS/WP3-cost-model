@@ -7,8 +7,7 @@
 #include "Topology.h"
 
 namespace CostModel {
-  Hardware::Hardware(const std::vector<std::tuple<std::string, Cost, Cost,
-  double, unsigned int>>& device_info) :
+  Hardware::Hardware(const std::vector<DevInfo>& device_info) :
   num_devices(device_info.size()),
   topo(num_devices, NetworkType::PART_CONN_GRAPH), NULLDEV(NULL) {
 
@@ -27,8 +26,8 @@ namespace CostModel {
     return;
   }
 
-  Hardware::Hardware(const std::vector<std::tuple<std::string, Cost, Cost,
-  double, unsigned int>>& device_info, NetworkType net_type) :
+  Hardware::Hardware(const std::vector<DevInfo>& device_info,
+  NetworkType net_type) :
   num_devices(device_info.size()), topo(num_devices, net_type),
   NULLDEV(NULL) {
 
@@ -47,8 +46,8 @@ namespace CostModel {
     return;
   }
 
-  Hardware::Hardware(const std::vector<std::tuple<std::string, Cost, Cost,
-  double, unsigned int>>& device_info, Hardware& old_hw) :
+  Hardware::Hardware(const std::vector<DevInfo>& device_info,
+  Hardware& old_hw) :
   num_devices(device_info.size() + old_hw.devices.size()),
   devices(std::move(old_hw.devices)), topo(num_devices, old_hw.topo),
   NULLDEV(NULL) {
@@ -67,8 +66,8 @@ namespace CostModel {
     return;
   }
 
-  Hardware::Hardware(const std::vector<std::tuple<std::string, Cost, Cost,
-  double, unsigned int>>& device_info, Hardware& old_hw, NetworkType net_type) :
+  Hardware::Hardware(const std::vector<DevInfo>& device_info, Hardware& old_hw,
+  NetworkType net_type) :
   num_devices(device_info.size() + old_hw.devices.size()),
   devices(std::move(old_hw.devices)), topo(num_devices, old_hw.topo, net_type),
   NULLDEV(NULL) {

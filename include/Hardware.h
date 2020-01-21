@@ -19,14 +19,10 @@ namespace CostModel {
 
     public:
       Hardware() = delete;
-      Hardware(const std::vector<std::tuple<std::string, Cost, Cost, double,
-        unsigned int>>&);
-      Hardware(const std::vector<std::tuple<std::string, Cost, Cost, double,
-        unsigned int>>&, NetworkType);
-      Hardware(const std::vector<std::tuple<std::string, Cost, Cost, double,
-        unsigned int>>&, Hardware&);
-      Hardware(const std::vector<std::tuple<std::string, Cost, Cost, double,
-        unsigned int>>&, Hardware&, NetworkType);
+      Hardware(const std::vector<DevInfo>&);
+      Hardware(const std::vector<DevInfo>&, NetworkType);
+      Hardware(const std::vector<DevInfo>&, Hardware&);
+      Hardware(const std::vector<DevInfo>&, Hardware&, NetworkType);
       Hardware(const Hardware& src) :
       num_devices(src.num_devices), devices(src.devices),
       topo(num_devices, src.topo), NULLDEV(NULL) {};

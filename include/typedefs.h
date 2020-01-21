@@ -23,6 +23,7 @@ namespace CostModel {
   typedef unsigned int DevID;
   typedef unsigned int LinkID;
   typedef std::vector<std::tuple<AccessType, unsigned int>> AccessPattern;
+  typedef std::tuple<std::string, Cost, Cost, double, unsigned int> DevInfo;
 }
 
 #endif

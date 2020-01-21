@@ -22,8 +22,7 @@ namespace CostModel {
 
     public:
       BasicCostModel() = delete;
-      BasicCostModel(const std::vector<std::tuple<std::string, Cost, Cost,
-        double, unsigned int>>& hw_info)
+      BasicCostModel(const std::vector<DevInfo>& hw_info)
         : hardware(hw_info) { defaultLayouts(); }
       BasicCostModel(Hardware& hw) : hardware(hw) { defaultLayouts(); }
 
