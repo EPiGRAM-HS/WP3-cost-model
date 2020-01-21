@@ -28,8 +28,8 @@ TEST_CASE("Device", "[unit]")
 
   SECTION("One Device") {
     const std::string NAME("DRAM");
-    const unsigned int BAC = 100;
-    const unsigned int EAC = 100 * BAC;
+    const Cost BAC = 100;
+    const Cost EAC = 100 * BAC;
     const double CAP = 256e9;
     const unsigned int VECLEN = 0;
     const Device DRAM(NAME, BAC, EAC, CAP, VECLEN);
@@ -70,8 +70,8 @@ TEST_CASE("Link", "[unit]")
   }
 
   SECTION("One Link") {
-    const unsigned int LAT = 2;
-    const unsigned int INV_BW = 4E4;
+    const Cost LAT = 2;
+    const Cost INV_BW = 4E4;
     const DevID DEV_A = 5;
     const DevID DEV_B = 12;
     const LinkID LID = unorderedCantor(DEV_A, DEV_B);
@@ -85,10 +85,10 @@ TEST_CASE("Link", "[unit]")
   }
 
   SECTION("Multiple Links") {
-    const unsigned int LAT1 = 2;
-    const unsigned int LAT2 = 3;
-    const unsigned int INV_BW1 = 4E4;
-    const unsigned int INV_BW2 = 57E3;
+    const Cost LAT1 = 2;
+    const Cost LAT2 = 3;
+    const Cost INV_BW1 = 4E4;
+    const Cost INV_BW2 = 57E3;
     const DevID DEV_A = 5;
     const DevID DEV_B = 12;
     const DevID DEV_C = 2;
@@ -439,17 +439,13 @@ TEST_CASE("Access", "[unit]") {
 
 TEST_CASE("Hardware", "[unit]")
 {
-  typedef std::vector<std::tuple<std::string, Cost, Cost, double, unsigned int>>
-    DevInfoVec;
-  typedef std::tuple<std::string, Cost, Cost, double, unsigned int> DevInfo;
-
   const DevInfo L1(std::string("L1"), 1, 2, 32768, 512);
   const DevInfo L2(std::string("L2"), 10, 20, 262144, 0);
   const DevInfo L3(std::string("L3"), 100, 200, 2.097e6, 0);
   const DevInfo DRAM(std::string("DRAM"), 10000, 20000, 6.872E10, 0);
   const DevInfo GPU(std::string("GPU"), 1000, 2000, 8.59E9, 16);
 
-  DevInfoVec device_info( { L1, L2, L3, DRAM, GPU } );
+  std::vector<DevInfo> device_info( { L1, L2, L3, DRAM, GPU } );
 
   SECTION("device_info only") {
     Hardware hardware(device_info);
@@ -502,7 +498,7 @@ TEST_CASE("Hardware", "[unit]")
   SECTION("device_info and old_hw") {
     Hardware old_hardware(device_info);
     const DevInfo GPU2(std::string("GPU2"), 1000, 2000, 8.59E9, 16);
-    DevInfoVec add_hw(1, GPU2);
+    std::vector<DevInfo> add_hw(1, GPU2);
 
     const int NUM_DEVICES = device_info.size() + add_hw.size();
 
@@ -536,7 +532,7 @@ TEST_CASE("Hardware", "[unit]")
   SECTION("device_info, old_hw, and net_type") {
     Hardware old_hardware(device_info);
     const DevInfo GPU2(std::string("GPU2"), 1000, 2000, 8.59E9, 16);
-    DevInfoVec add_hw(1, GPU2);
+    std::vector<DevInfo> add_hw(1, GPU2);
 
     const int NUM_DEVICES = device_info.size() + add_hw.size();
 
@@ -594,17 +590,13 @@ TEST_CASE("Hardware", "[unit]")
 
 TEST_CASE("BasicCostModel", "[unit]")
 {
-  typedef std::vector<std::tuple<std::string, Cost, Cost, double, unsigned int>>
-    DevInfoVec;
-  typedef std::tuple<std::string, Cost, Cost, double, unsigned int> DevInfo;
-
   const DevInfo L1(std::string("L1"), 1, 2, 32768, 512);
   const DevInfo L2(std::string("L2"), 10, 20, 262144, 0);
   const DevInfo L3(std::string("L3"), 100, 200, 2.097e6, 0);
   const DevInfo DRAM(std::string("DRAM"), 10000, 20000, 6.872E10, 0);
   const DevInfo GPU(std::string("GPU"), 1000, 2000, 8.59E9, 16);
 
-  DevInfoVec device_info( { L1, L2, L3, DRAM, GPU } );
+  std::vector<DevInfo> device_info( { L1, L2, L3, DRAM, GPU } );
   const size_t NUM_DEVICES = device_info.size();
 
   BasicCostModel model(device_info);
